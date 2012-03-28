@@ -15,8 +15,17 @@ import scala.collection.{mutable, immutable}
 
 object TestRunner extends App
 {
-    class Node( val lat : Double, val lon : Double )
-    class Way()
+    class Taggable
+    {
+        var tags = mutable.HashMap[String, String]()  
+        def add( k : String, v : String )
+        {
+            tags += k -> v
+        }
+    }
+    
+    class Node( val lat : Double, val lon : Double ) extends Taggable
+    class Way() extends Taggable
     {
         var nodes = mutable.ArrayBuffer[Node]()
     }
@@ -33,10 +42,13 @@ object TestRunner extends App
         {
             if ( !w.nodes.isEmpty )
             {
-                val xs = w.nodes.map( _.lat.toFloat ).toArray
-                val ys = w.nodes.map( _.lon.toFloat ).toArray
-                val node = PPath.createPolyline( xs, ys )
-                node.setStroke( new java.awt.BasicStroke( 3.0f, java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND ) )
+                val xs = w.nodes.map( _.lon.toFloat ).toArray
+                val ys = w.nodes.map( -_.lat.toFloat ).toArray
+                
+                //val node = PPath.createPolyline( xs, ys )
+                val node = new PPath()
+                node.setPathToPolyline( xs, ys )
+                node.setStroke( new java.awt.BasicStroke( 1.0f, java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND ) )
                 node.setStrokePaint( new java.awt.Color( nextFloat, nextFloat, nextFloat ) )
                 canvas.getLayer().addChild(node)
             }
@@ -44,8 +56,8 @@ object TestRunner extends App
         
         for ( node <- nodes )
         {
-            val circ = PPath.createEllipse( node.lat.toFloat, node.lon.toFloat, 3.0f, 3.0f )
-            canvas.getLayer().addChild( circ )
+            //val circ = PPath.createEllipse( node.lon.toFloat, -node.lat.toFloat, 3.0f, 3.0f )
+            //canvas.getLayer().addChild( circ )
         }
         
 
@@ -77,6 +89,7 @@ object TestRunner extends App
 
         val (meanlon, meanlat) = ((bounds.lon1 + bounds.lon2)/2.0, (bounds.lat1 + bounds.lat2)/2.0)
         
+        var currTaggable : Option[Taggable] = None
         var currWay = new Way()
         while (parser.hasNext)
         {
@@ -90,13 +103,25 @@ object TestRunner extends App
                     
                     if ( bounds.within( lat, lon ) )
                     {
-                        nodes += id -> new Node( (lat-meanlat) * 10000.0, (lon-meanlon) * 10000.0 )
+                        val nn = new Node( (lat-meanlat) * 10000.0, (lon-meanlon) * 10000.0 )
+                        nodes += id -> nn
+                        currTaggable = Some(nn)
                     }
                 }
                 
                 case EvElemStart(_, "way", attrs, _) =>
                 {
                     currWay = new Way()
+                    currTaggable = Some(currWay)
+                }
+                
+                case EvElemStart(_, "tag", attrs, _) =>
+                {
+                    currTaggable match
+                    {
+                        case Some(taggable) => taggable.add( attrs("k").text, attrs("v").text )
+                        case _ =>
+                    }
                 }
                 
                 case EvElemStart(_, "nd", attrs, _) =>
@@ -111,6 +136,7 @@ object TestRunner extends App
                     ways.append( currWay )
                     currWay = new Way()
                 }
+                
 
                 case _ =>
             }
