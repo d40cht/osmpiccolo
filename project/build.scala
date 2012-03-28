@@ -17,7 +17,8 @@ object PiccoloBuild extends Build
             scalacOptions       += "-deprecation",
             libraryDependencies ++= Seq(
                 "org.scalatest" % "scalatest_2.9.1" % "1.6.1",
-                "org.piccolo2d" % "piccolo2d-core" % "1.3.1"
+                "org.piccolo2d" % "piccolo2d-core" % "1.3.1",
+                "org.apache.commons" % "commons-compress" % "1.3"
             )
         )
     )
