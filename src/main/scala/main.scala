@@ -51,7 +51,7 @@ object TestRunner extends App
                 
                 val wood = w.has( "natural", "wood" )
                 val highway = w.has( "highway" )
-                val building = w.has( "building" )
+                val building = w.has( "building" ) || w.has( "landuse", "residential" )
                 val waterway = w.has( "waterway", "riverbank" ) || w.has("natural", "water")
                 val garden = w.has("residential", "garden" ) || w.has("leisure", "common") || w.has("leisure", "park") || w.has("landuse", "grass") || w.has("landuse", "meadow") || w.has("leisure", "pitch") || w.has( "leisure", "recreation_ground") || w.has( "landuse", "recreation_ground") || w.has( "landuse", "farmland") || w.has( "leisure", "nature_reserve")
                 val field = w.has("landuse", "field") || w.has("landuse", "farm")
@@ -83,7 +83,7 @@ object TestRunner extends App
                 val lineCol = if ( highway )
                 {
                     val htype = w.keys("highway")
-                    if ( htype == "path" || htype == "track" || htype == "footway" || htype == "cycleway" )
+                    if ( htype == "path" || htype == "track" || htype == "footway" || htype == "cycleway" || htype == "bridleway" )
                     {
                         dashPattern = Some( Array( 5.0f, 5.0f ) )
                         new java.awt.Color( 0.0f, 0.0f, 1.0f )
