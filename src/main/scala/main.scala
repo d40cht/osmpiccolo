@@ -50,22 +50,26 @@ object TestRunner extends App
                 val ys = w.nodes.map( -_.lat.toFloat ).toArray
                 
                 val wood = w.has( "natural", "wood" )
-                val road = w.has( "highway" )
+                val highway = w.has( "highway" )
                 val building = w.has( "building" )
-                val waterway = w.has( "waterway", "riverbank" )
-                val closed = wood || building || waterway
+                val waterway = w.has( "waterway", "riverbank" ) || w.has("natural", "water")
+                val garden = w.has("residential", "garden" ) || w.has("leisure", "common") || w.has("leisure", "park") || w.has("landuse", "grass") || w.has("landuse", "meadow") || w.has("leisure", "pitch") || w.has( "leisure", "recreation_ground") || w.has( "landuse", "recreation_ground") || w.has( "landuse", "farmland") || w.has( "leisure", "nature_reserve")
+                val field = w.has("landuse", "field") || w.has("landuse", "farm")
+                val closed = wood || building || waterway || garden || field
                 
                 val layer = if ( w.has("layer") ) w.keys("layer").toInt
-                else if ( wood | waterway ) -1
+                else if ( closed ) -1
                 else 0
                 
                 val node = new PPath()
                 node.setPathToPolyline( xs, ys )
                 if (closed)
                 {
-                    val col = if ( wood ) new java.awt.Color( 0.0f, 1.0f, 0.0f )
+                    val col = if ( wood ) new java.awt.Color( 0.0f, 0.6f, 0.0f )
                     else if ( building ) new java.awt.Color( 0.5f, 0.5f, 0.5f )
                     else if ( waterway ) new java.awt.Color( 0.5f, 0.5f, 1.0f )
+                    else if ( garden ) new java.awt.Color( 0.0f, 1.0f, 0.0f )
+                    else if ( field ) new java.awt.Color( 0.5f, 0.3f, 0.3f )
                     else new java.awt.Color( 0.8f, 0.8f, 0.8f )
                     node.setPaint( col )
                     node.closePath()
@@ -74,11 +78,37 @@ object TestRunner extends App
                 {
                     node
                 }
-                val lineCol = if ( road ) new java.awt.Color( 0.3f, 0.0f, 0.0f )
+                
+                var dashPattern : Option[Array[Float]] = None
+                val lineCol = if ( highway )
+                {
+                    val htype = w.keys("highway")
+                    if ( htype == "path" || htype == "track" || htype == "footway" || htype == "cycleway" )
+                    {
+                        dashPattern = Some( Array( 5.0f, 5.0f ) )
+                        new java.awt.Color( 0.0f, 0.0f, 1.0f )
+                        
+                    }
+                    else
+                    {
+                        new java.awt.Color( 0.3f, 0.0f, 0.0f )
+                    }
+                }
                 else if ( w.has("waterway" ) ) new java.awt.Color( 0.5f, 0.5f, 1.0f )
                 else new java.awt.Color( 0.7f, 0.7f, 0.7f )
                 
-                node.setStroke( new java.awt.BasicStroke( 1.0f, java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND ) )
+                dashPattern match
+                {
+                    case Some(pattern) =>
+                    {
+                        node.setStroke( new java.awt.BasicStroke( 1.0f, java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND, 10, pattern, 0 ) )
+                    }
+                    case _ =>
+                    {
+                        node.setStroke( new java.awt.BasicStroke( 1.0f, java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND ) )
+                    }
+                }
+                
                 node.setStrokePaint( lineCol )
                 //canvas.getLayer().addChild(node)
                 layered.append( (layer, node, w) )
@@ -192,8 +222,10 @@ object TestRunner extends App
     
     override def main( args : Array[String] ) =
     {
-        val f = new XMLFilter( args(0), new Bounds(-1.3558, -1.2949, 51.7554, 51.7916) )
+        //val f = new XMLFilter( args(0), new Bounds(-1.3558, -1.2949, 51.7554, 51.7916) )
+        val f = new XMLFilter( args(0), new Bounds(-1.4558, -1.1949, 51.6554, 51.8916) )
         val c = new Canvas( f.nodes.view.map( _._2 ), f.ways )
     }
 }
+
 
