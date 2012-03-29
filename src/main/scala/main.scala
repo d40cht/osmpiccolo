@@ -9,6 +9,7 @@ import scala.xml.pull.{XMLEventReader, EvElemStart, EvElemEnd, EvText}
 
 import edu.umd.cs.piccolo.PCanvas
 import edu.umd.cs.piccolo.nodes.{PText, PPath}
+import edu.umd.cs.piccolo.event.{PBasicInputEventHandler, PInputEvent}
 
 import scala.util.Random.{nextInt, nextFloat}
 import scala.collection.{mutable, immutable}
@@ -17,11 +18,16 @@ object TestRunner extends App
 {
     class Taggable
     {
-        var tags = mutable.HashMap[String, String]()  
+        var tags = immutable.HashSet[(String, String)]()
+        var keys = immutable.HashMap[String, String]()
         def add( k : String, v : String )
         {
-            tags += k -> v
+            tags += ( (k, v) )
+            keys += k -> v
         }
+        
+        def has( k : String, v : String ) = tags.contains( (k, v) )
+        def has( k : String ) = keys.contains(k)
     }
     
     class Node( val lat : Double, val lon : Double ) extends Taggable
@@ -32,12 +38,10 @@ object TestRunner extends App
     
     class Canvas( val nodes : Iterable[Node], val ways : Iterable[Way] ) extends JFrame
     {
-        val canvas = new PCanvas()
-        val text = new PText("Boom")
-        
-        canvas.getLayer().addChild(text)
+        val canvas = new PCanvas()        
         add(canvas)
         
+        val layered = mutable.ListBuffer[(Int, PPath, Taggable)]()
         for ( w <- ways )
         {
             if ( !w.nodes.isEmpty )
@@ -45,13 +49,56 @@ object TestRunner extends App
                 val xs = w.nodes.map( _.lon.toFloat ).toArray
                 val ys = w.nodes.map( -_.lat.toFloat ).toArray
                 
-                //val node = PPath.createPolyline( xs, ys )
+                val wood = w.has( "natural", "wood" )
+                val road = w.has( "highway" )
+                val building = w.has( "building" )
+                val waterway = w.has( "waterway", "riverbank" )
+                val closed = wood || building || waterway
+                
+                val layer = if ( w.has("layer") ) w.keys("layer").toInt
+                else if ( wood | waterway ) -1
+                else 0
+                
                 val node = new PPath()
                 node.setPathToPolyline( xs, ys )
+                if (closed)
+                {
+                    val col = if ( wood ) new java.awt.Color( 0.0f, 1.0f, 0.0f )
+                    else if ( building ) new java.awt.Color( 0.5f, 0.5f, 0.5f )
+                    else if ( waterway ) new java.awt.Color( 0.5f, 0.5f, 1.0f )
+                    else new java.awt.Color( 0.8f, 0.8f, 0.8f )
+                    node.setPaint( col )
+                    node.closePath()
+                }
+                else
+                {
+                    node
+                }
+                val lineCol = if ( road ) new java.awt.Color( 0.3f, 0.0f, 0.0f )
+                else if ( w.has("waterway" ) ) new java.awt.Color( 0.5f, 0.5f, 1.0f )
+                else new java.awt.Color( 0.7f, 0.7f, 0.7f )
+                
                 node.setStroke( new java.awt.BasicStroke( 1.0f, java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND ) )
-                node.setStrokePaint( new java.awt.Color( nextFloat, nextFloat, nextFloat ) )
-                canvas.getLayer().addChild(node)
+                node.setStrokePaint( lineCol )
+                //canvas.getLayer().addChild(node)
+                layered.append( (layer, node, w) )
             }
+        }
+        
+        for ( (l, n, t) <- layered.sortWith( _._1 < _._1 ) )
+        {
+            canvas.getLayer().addChild(n)
+            
+            n.addInputEventListener( new PBasicInputEventHandler()
+            {
+                override def mousePressed( event : PInputEvent )
+                {
+                    println( t.keys.toList )
+                }
+                override def mouseDragged( event : PInputEvent ) {}
+                override def mouseReleased( event : PInputEvent ) {}
+                override def keyPressed( event : PInputEvent ) {}
+            } )
         }
         
         for ( node <- nodes )
@@ -103,7 +150,7 @@ object TestRunner extends App
                     
                     if ( bounds.within( lat, lon ) )
                     {
-                        val nn = new Node( (lat-meanlat) * 10000.0, (lon-meanlon) * 10000.0 )
+                        val nn = new Node( (lat-meanlat) * 30000.0, (lon-meanlon) * 30000.0 )
                         nodes += id -> nn
                         currTaggable = Some(nn)
                     }
