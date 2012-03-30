@@ -49,15 +49,15 @@ object TestRunner extends App
                 val xs = w.nodes.map( _.lon.toFloat ).toArray
                 val ys = w.nodes.map( -_.lat.toFloat ).toArray
                 
-                val wood = w.has( "natural", "wood" )
+                val wood = w.has( "natural", "wood" ) || w.has( "landuse", "forest" )
                 val highway = w.has( "highway" )
                 val building = w.has( "building" ) || w.has( "landuse", "residential" )
-                val waterway = w.has( "waterway", "riverbank" ) || w.has("natural", "water")
+                val waterway = w.has( "waterway", "riverbank" ) || w.has("natural", "water") || w.has("natural", "coastline")
                 val garden = w.has("residential", "garden" ) || w.has("leisure", "common") || w.has("leisure", "park") || w.has("landuse", "grass") || w.has("landuse", "meadow") || w.has("leisure", "pitch") || w.has( "leisure", "recreation_ground") || w.has( "landuse", "recreation_ground") || w.has( "landuse", "farmland") || w.has( "leisure", "nature_reserve")
                 val field = w.has("landuse", "field") || w.has("landuse", "farm")
                 val closed = wood || building || waterway || garden || field
                 
-                val layer = if ( w.has("layer") ) w.keys("layer").toInt
+                val layer = if ( w.has("layer") ) w.keys("layer").filter( _ != '+' ).toInt
                 else if ( closed ) -1
                 else 0
                 
@@ -222,8 +222,15 @@ object TestRunner extends App
     
     override def main( args : Array[String] ) =
     {
-        //val f = new XMLFilter( args(0), new Bounds(-1.3558, -1.2949, 51.7554, 51.7916) )
-        val f = new XMLFilter( args(0), new Bounds(-1.4558, -1.1949, 51.6554, 51.8916) )
+        // Oxford
+        //val f = new XMLFilter( args(0), new Bounds(-1.4558, -1.1949, 51.6554, 51.8916) )
+        
+        // Stockholm
+        //val f = new XMLFilter( args(0), new Bounds(17.638, 18.47, 59.165, 59.502) )
+        
+        // West Chilterns
+        val f = new XMLFilter( args(0), new Bounds(-1.0436, -0.8356, 51.5668, 51.6656) )
+        
         val c = new Canvas( f.nodes.view.map( _._2 ), f.ways )
     }
 }
