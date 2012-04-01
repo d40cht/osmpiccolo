@@ -31,6 +31,10 @@ object TestRunner extends App
     }
     
     class Node( val lat : Double, val lon : Double ) extends Taggable
+    {
+        var inWay = false
+    }
+    
     class Way() extends Taggable
     {
         var nodes = mutable.ArrayBuffer[Node]()
@@ -38,8 +42,24 @@ object TestRunner extends App
     
     class Canvas( val nodes : Iterable[Node], val ways : Iterable[Way] ) extends JFrame
     {
+        val jp = javax.swing.Box.createHorizontalBox()
+        add(jp)
         val canvas = new PCanvas()        
-        add(canvas)
+        jp.add(canvas)
+        
+        val tm = new javax.swing.table.AbstractTableModel()
+        {
+            var data = Array.tabulate( 10, 2 )( (x, y) => (x * y).toString )
+            override def getColumnCount() = if ( data.size == 0 ) 0 else data(0).size
+            override def getRowCount() = data.size
+            override def getValueAt( row : Int, col : Int ) = data(row)(col)
+        }
+        val tb = new javax.swing.JTable(tm)
+        val sp = new javax.swing.JScrollPane(tb) 
+        sp.setMaximumSize( new java.awt.Dimension( 250, 800 ) )
+        sp.setMinimumSize( new java.awt.Dimension( 250, 800 ) )
+        sp.setPreferredSize( new java.awt.Dimension( 250, 800 ) )
+        jp.add( sp )
         
         val layered = mutable.ListBuffer[(Int, PPath, Taggable)]()
         for ( w <- ways )
@@ -66,7 +86,7 @@ object TestRunner extends App
                 if (closed)
                 {
                     val col = if ( wood ) new java.awt.Color( 0.0f, 0.6f, 0.0f )
-                    else if ( building ) new java.awt.Color( 0.5f, 0.5f, 0.5f )
+                    else if ( building ) new java.awt.Color( 0.9f, 0.9f, 0.9f )
                     else if ( waterway ) new java.awt.Color( 0.5f, 0.5f, 1.0f )
                     else if ( garden ) new java.awt.Color( 0.0f, 1.0f, 0.0f )
                     else if ( field ) new java.awt.Color( 0.5f, 0.3f, 0.3f )
@@ -86,13 +106,25 @@ object TestRunner extends App
                     if ( htype == "path" || htype == "track" || htype == "footway" || htype == "cycleway" || htype == "bridleway" )
                     {
                         dashPattern = Some( Array( 5.0f, 5.0f ) )
-                        new java.awt.Color( 0.0f, 0.0f, 1.0f )
+                        if (htype == "cycleway" )
+                        {
+                            new java.awt.Color( 0.0f, 1.0f, 0.0f )
+                        }
+                        else
+                        {
+                            new java.awt.Color( 0.0f, 0.0f, 1.0f )
+                        }
                         
                     }
                     else
                     {
                         new java.awt.Color( 0.3f, 0.0f, 0.0f )
                     }
+                }
+                else if ( w.has("railway") )
+                {
+                    dashPattern = Some( Array( 3.0f, 3.0f ) )
+                    new java.awt.Color( 0.0f, 0.0f, 0.0f )
                 }
                 else if ( w.has("waterway" ) ) new java.awt.Color( 0.5f, 0.5f, 1.0f )
                 else new java.awt.Color( 0.7f, 0.7f, 0.7f )
@@ -119,11 +151,22 @@ object TestRunner extends App
         {
             canvas.getLayer().addChild(n)
             
+            if ( false && t.has("name") )
+            {   
+                val label = new PText(t.keys("name"))
+                label.setHorizontalAlignment( java.awt.Component.CENTER_ALIGNMENT )
+                label.setBounds( n.getBounds() )
+                label.setConstrainHeightToTextHeight(true)
+                label.setConstrainWidthToTextWidth(true)
+                canvas.getLayer().addChild(label)
+            }
+            
             n.addInputEventListener( new PBasicInputEventHandler()
             {
                 override def mousePressed( event : PInputEvent )
                 {
-                    println( t.keys.toList )
+                    tm.data = t.keys.toArray.map( x => Array( x._1, x._2 ) )
+                    tm.fireTableDataChanged()
                 }
                 override def mouseDragged( event : PInputEvent ) {}
                 override def mouseReleased( event : PInputEvent ) {}
@@ -131,10 +174,33 @@ object TestRunner extends App
             } )
         }
         
-        for ( node <- nodes )
+        for ( node <- nodes.view.filter( !_.inWay ) )
         {
-            //val circ = PPath.createEllipse( node.lon.toFloat, -node.lat.toFloat, 3.0f, 3.0f )
-            //canvas.getLayer().addChild( circ )
+            val circ = PPath.createEllipse( node.lon.toFloat, -node.lat.toFloat, 3.0f, 3.0f )
+            canvas.getLayer().addChild(circ)
+            
+            if ( false && node.has("name") )
+            {
+                val label = new PText()
+                label.setBounds( node.lon.toFloat, -node.lat.toFloat, 0, 0 )
+                label.setHorizontalAlignment( java.awt.Component.CENTER_ALIGNMENT )
+                label.setConstrainHeightToTextHeight(true)
+                label.setConstrainWidthToTextWidth(true)
+                label.setText( node.keys("name") )
+                canvas.getLayer().addChild(label)
+            }
+            
+            circ.addInputEventListener( new PBasicInputEventHandler()
+            {
+                override def mousePressed( event : PInputEvent )
+                {
+                    tm.data = node.keys.toArray.map( x => Array( x._1, x._2 ) )
+                    tm.fireTableDataChanged()
+                }
+                override def mouseDragged( event : PInputEvent ) {}
+                override def mouseReleased( event : PInputEvent ) {}
+                override def keyPressed( event : PInputEvent ) {}
+            } )
         }
         
 
@@ -205,7 +271,11 @@ object TestRunner extends App
                 {
                     val ref = attrs("ref").text.toLong
                     if ( nodes.contains(ref) )
-                    currWay.nodes.append( nodes(ref) )
+                    {
+                        val theNode = nodes(ref)
+                        theNode.inWay = true
+                        currWay.nodes.append( theNode )
+                    }
                 }
                                 
                 case EvElemEnd(_, "way" ) =>
@@ -223,13 +293,13 @@ object TestRunner extends App
     override def main( args : Array[String] ) =
     {
         // Oxford
-        //val f = new XMLFilter( args(0), new Bounds(-1.4558, -1.1949, 51.6554, 51.8916) )
+        val f = new XMLFilter( args(0), new Bounds(-1.4558, -1.1949, 51.6554, 51.8916) )
         
         // Stockholm
         //val f = new XMLFilter( args(0), new Bounds(17.638, 18.47, 59.165, 59.502) )
         
         // West Chilterns
-        val f = new XMLFilter( args(0), new Bounds(-1.0436, -0.8356, 51.5668, 51.6656) )
+        //val f = new XMLFilter( args(0), new Bounds(-1.0436, -0.8356, 51.5668, 51.6656) )
         
         val c = new Canvas( f.nodes.view.map( _._2 ), f.ways )
     }
