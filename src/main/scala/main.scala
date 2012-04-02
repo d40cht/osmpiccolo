@@ -14,6 +14,7 @@ import edu.umd.cs.piccolo.event.{PBasicInputEventHandler, PInputEvent}
 import scala.util.Random.{nextInt, nextFloat}
 import scala.collection.{mutable, immutable}
 
+import org.jgrapht._
 
 object EntityType extends Enumeration
 {
@@ -55,7 +56,8 @@ object TestRunner extends App
     
     class Node( val lat : Double, val lon : Double ) extends Taggable
     {
-        var inWay = false
+        var wayMembership = 0
+        def inWay = wayMembership > 0
     }
     
     class Way() extends Taggable
@@ -242,77 +244,79 @@ object TestRunner extends App
     
     // Longitude W-E
     class XMLFilter( val fileName : String, bounds : Bounds )
-    {
-        val fin = new FileInputStream( fileName )
-        val in = new BufferedInputStream(fin)
-        val decompressor = new BZip2CompressorInputStream(in)
-        
-        val source = Source.fromInputStream( decompressor )
-        val parser = new XMLEventReader(source)
-        
+    {           
         var nodes = mutable.HashMap[Long, Node]()
         val ways = mutable.ArrayBuffer[Way]()
 
-        val (meanlon, meanlat) = ((bounds.lon1 + bounds.lon2)/2.0, (bounds.lat1 + bounds.lat2)/2.0)
-        
-        var currTaggable : Option[Taggable] = None
-        var currWay = new Way()
-        while (parser.hasNext)
         {
-            parser.next match
+            val fin = new FileInputStream( fileName )
+            val in = new BufferedInputStream(fin)
+            val decompressor = new BZip2CompressorInputStream(in)
+            
+            val source = Source.fromInputStream( decompressor )
+            val parser = new XMLEventReader(source)
+            
+            val (meanlon, meanlat) = ((bounds.lon1 + bounds.lon2)/2.0, (bounds.lat1 + bounds.lat2)/2.0)
+            
+            var currTaggable : Option[Taggable] = None
+            var currWay = new Way()
+            while (parser.hasNext)
             {
-                case EvElemStart(_, "node", attrs, _) =>
+                parser.next match
                 {
-                    val id = attrs("id").text.toLong
-                    val lat = attrs("lat").text.toDouble
-                    val lon = attrs("lon").text.toDouble
+                    case EvElemStart(_, "node", attrs, _) =>
+                    {
+                        val id = attrs("id").text.toLong
+                        val lat = attrs("lat").text.toDouble
+                        val lon = attrs("lon").text.toDouble
+                        
+                        if ( bounds.within( lat, lon ) )
+                        {
+                            val nn = new Node( (lat-meanlat) * 30000.0, (lon-meanlon) * 30000.0 )
+                            nodes += id -> nn
+                            currTaggable = Some(nn)
+                        }
+                    }
                     
-                    if ( bounds.within( lat, lon ) )
+                    case EvElemStart(_, "way", attrs, _) =>
                     {
-                        val nn = new Node( (lat-meanlat) * 30000.0, (lon-meanlon) * 30000.0 )
-                        nodes += id -> nn
-                        currTaggable = Some(nn)
+                        currWay = new Way()
+                        currTaggable = Some(currWay)
                     }
-                }
-                
-                case EvElemStart(_, "way", attrs, _) =>
-                {
-                    currWay = new Way()
-                    currTaggable = Some(currWay)
-                }
-                
-                case EvElemStart(_, "tag", attrs, _) =>
-                {
-                    currTaggable match
+                    
+                    case EvElemStart(_, "tag", attrs, _) =>
                     {
-                        case Some(taggable) => taggable.add( attrs("k").text, attrs("v").text )
-                        case _ =>
+                        currTaggable match
+                        {
+                            case Some(taggable) => taggable.add( attrs("k").text, attrs("v").text )
+                            case _ =>
+                        }
                     }
-                }
-                
-                case EvElemStart(_, "nd", attrs, _) =>
-                {
-                    val ref = attrs("ref").text.toLong
-                    if ( nodes.contains(ref) )
+                    
+                    case EvElemStart(_, "nd", attrs, _) =>
                     {
-                        val theNode = nodes(ref)
-                        theNode.inWay = true
-                        currWay.nodes.append( theNode )
+                        val ref = attrs("ref").text.toLong
+                        if ( nodes.contains(ref) )
+                        {
+                            val theNode = nodes(ref)
+                            theNode.wayMembership += 1
+                            currWay.nodes.append( theNode )
+                        }
                     }
-                }
-                                
-                case EvElemEnd(_, "way" ) =>
-                {
-                    ways.append( currWay )
-                    currWay = new Way()
-                }
-                
+                                    
+                    case EvElemEnd(_, "way" ) =>
+                    {
+                        ways.append( currWay )
+                        currWay = new Way()
+                    }
+                    
 
-                case _ =>
+                    case _ =>
+                }
             }
-        }
+        }            
     }
-    
+        
     override def main( args : Array[String] ) =
     {
         // Oxford
