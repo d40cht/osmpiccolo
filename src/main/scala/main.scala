@@ -24,9 +24,9 @@ object EntityType extends Enumeration
     
     val unknown         = new Element("Unknown",        false, new Color( 0.7f, 0.4f, 0.7f ))
     val highway         = new Element("Highway",        false, new Color( 0.3f, 0.0f, 0.0f ))
-    val cycleway        = new Element("Cycleway",       false, new Color( 0.0f, 1.0f, 0.0f ), Some( Array( 2.0f, 1.0f ) ))
-    val footpath        = new Element("Footpath",       false, new Color( 0.0f, 0.0f, 1.0f ), Some( Array( 2.0f, 1.0f ) ))
-    val railway         = new Element("Railway",        false, new Color( 0.0f, 0.0f, 0.0f ), Some( Array( 3.0f, 3.0f ) ))
+    val cycleway        = new Element("Cycleway",       false, new Color( 0.0f, 1.0f, 0.0f ), Some( Array( 3.0f, 3.0f ) ))
+    val footpath        = new Element("Footpath",       false, new Color( 0.0f, 0.0f, 1.0f ), Some( Array( 3.0f, 3.0f ) ))
+    val railway         = new Element("Railway",        false, new Color( 0.0f, 0.0f, 0.0f ), Some( Array( 4.0f, 4.0f ) ))
     val unknownLine     = new Element("Unknown line",   false, new Color( 0.7f, 0.7f, 0.7f ))
     
     val building        = new Element("Building",       true,  new Color( 0.9f, 0.9f, 0.9f ))
@@ -94,67 +94,14 @@ object TestRunner extends App
                 val xs = w.nodes.map( _.lon.toFloat ).toArray
                 val ys = w.nodes.map( -_.lat.toFloat ).toArray
                 
-                val wood = w.has( "natural", "wood" ) || w.has( "landuse", "forest" )
-                val highway = w.has( "highway" )
-                val building = w.has( "building" ) || w.has( "landuse", "residential" )
-                val waterway = w.has( "waterway", "riverbank" ) || w.has("natural", "water") || w.has("natural", "coastline")
-                val garden = w.has("residential", "garden" ) || w.has("leisure", "common") || w.has("leisure", "park") || w.has("landuse", "grass") || w.has("landuse", "meadow") || w.has("leisure", "pitch") || w.has( "leisure", "recreation_ground") || w.has( "landuse", "recreation_ground") || w.has( "landuse", "farmland") || w.has( "leisure", "nature_reserve")
-                val field = w.has("landuse", "field") || w.has("landuse", "farm")
-                val closed = wood || building || waterway || garden || field
-                
+                val ctype = w.entityType
                 val layer = if ( w.has("layer") ) w.keys("layer").filter( _ != '+' ).toInt
-                else if ( closed ) -1
+                else if ( ctype.closed ) -1
                 else 0
                 
                 val node = new PPath()
                 node.setPathToPolyline( xs, ys )
-                if (closed)
-                {
-                    val col = if ( wood ) new java.awt.Color( 0.0f, 0.6f, 0.0f )
-                    else if ( building ) new java.awt.Color( 0.9f, 0.9f, 0.9f )
-                    else if ( waterway ) new java.awt.Color( 0.5f, 0.5f, 1.0f )
-                    else if ( garden ) new java.awt.Color( 0.0f, 1.0f, 0.0f )
-                    else if ( field ) new java.awt.Color( 0.5f, 0.3f, 0.3f )
-                    else new java.awt.Color( 0.8f, 0.8f, 0.8f )
-                    node.setPaint( col )
-                    node.closePath()
-                }
-                else
-                {
-                    node
-                }
-                
-                var dashPattern : Option[Array[Float]] = None
-                val lineCol = if ( highway )
-                {
-                    val htype = w.keys("highway")
-                    if ( htype == "path" || htype == "track" || htype == "footway" || htype == "cycleway" || htype == "bridleway" )
-                    {
-                        dashPattern = Some( Array( 5.0f, 5.0f ) )
-                        if (htype == "cycleway" )
-                        {
-                            new java.awt.Color( 0.0f, 1.0f, 0.0f )
-                        }
-                        else
-                        {
-                            new java.awt.Color( 0.0f, 0.0f, 1.0f )
-                        }
-                        
-                    }
-                    else
-                    {
-                        new java.awt.Color( 0.3f, 0.0f, 0.0f )
-                    }
-                }
-                else if ( w.has("railway") )
-                {
-                    dashPattern = Some( Array( 3.0f, 3.0f ) )
-                    new java.awt.Color( 0.0f, 0.0f, 0.0f )
-                }
-                else if ( w.has("waterway" ) ) new java.awt.Color( 0.5f, 0.5f, 1.0f )
-                else new java.awt.Color( 0.7f, 0.7f, 0.7f )
-                
-                dashPattern match
+                ctype.dashPattern match
                 {
                     case Some(pattern) =>
                     {
@@ -166,8 +113,16 @@ object TestRunner extends App
                     }
                 }
                 
-                node.setStrokePaint( lineCol )
-                //canvas.getLayer().addChild(node)
+                if ( ctype.closed )
+                {
+                    node.setPaint( ctype.color )
+                    node.closePath()
+                }
+                else
+                {
+                    node.setStrokePaint( ctype.color )
+                }
+                
                 layered.append( (layer, node, w) )
             }
         }
@@ -306,6 +261,7 @@ object TestRunner extends App
                                     
                     case EvElemEnd(_, "way" ) =>
                     {
+                        currWay.entityType = wayType( currWay )
                         ways.append( currWay )
                         currWay = new Way()
                     }
@@ -314,8 +270,40 @@ object TestRunner extends App
                     case _ =>
                 }
             }
+        }
+        
+        private def wayType( w : Way ) =
+        {
+            val wood = w.has( "natural", "wood" ) || w.has( "landuse", "forest" )
+            val highway = w.has( "highway" )
+            val building = w.has( "building" ) || w.has( "landuse", "residential" )
+            val waterway = w.has( "waterway", "riverbank" ) || w.has("natural", "water") || w.has("natural", "coastline")
+            val garden = w.has("residential", "garden" ) || w.has("leisure", "common") || w.has("leisure", "park") || w.has("landuse", "grass") || w.has("landuse", "meadow") || w.has("leisure", "pitch") || w.has( "leisure", "recreation_ground") || w.has( "landuse", "recreation_ground") || w.has( "landuse", "farmland") || w.has( "leisure", "nature_reserve")
+            val field = w.has("landuse", "field") || w.has("landuse", "farm")
+            val railway = w.has("railway")
+            val closed = wood || building || waterway || garden || field
+         
+            if ( wood ) EntityType.woodland
+            else if ( building ) EntityType.building
+            else if ( waterway ) EntityType.waterway
+            else if ( garden ) EntityType.greenspace
+            else if ( field ) EntityType.farmland
+            else if ( railway ) EntityType.railway
+            else if ( waterway ) EntityType.waterway
+            else if ( highway )
+            {
+                w.keys("highway") match
+                {
+                    case ("path"|"track"|"footway"|"bridleway") => EntityType.footpath
+                    case "cycleway" => EntityType.cycleway
+                    case _ => EntityType.highway
+                }
+               
+            }
+            else EntityType.unknown
         }            
     }
+    
     
     class GenerateRouteGraph( xf : XMLFilter )
     {
