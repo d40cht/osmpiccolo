@@ -311,6 +311,10 @@ object TestRunner extends App
         
         val graph = new GraphT(classOf[DefaultWeightedEdge])
 
+        // When generating the routing graph, we are interested in keeping
+        // nodes that are at the start or end of a way, or in more than one
+        // way (way intersection points). All the rest can go, having
+        // absorbed relevant distance information
         def processWay( way : Way )
         {
             val lastIndex = way.nodes.length-1
@@ -333,6 +337,7 @@ object TestRunner extends App
             }
         }
 
+        // Build the routing graph, way-by-way
         {
             for ( w <- xf.ways )
             {
