@@ -14,10 +14,33 @@ import edu.umd.cs.piccolo.event.{PBasicInputEventHandler, PInputEvent}
 import scala.util.Random.{nextInt, nextFloat}
 import scala.collection.{mutable, immutable}
 
+
+object EntityType extends Enumeration
+{
+    import java.awt.Color
+    
+    class Element( val name : String, val closed : Boolean, val color : java.awt.Color, val dashPattern : Option[Array[Float]] = None ) extends Val(name)
+    
+    val unknown         = new Element("Unknown",        false, new Color( 0.7f, 0.4f, 0.7f ))
+    val highway         = new Element("Highway",        false, new Color( 0.3f, 0.0f, 0.0f ))
+    val cycleway        = new Element("Cycleway",       false, new Color( 0.0f, 1.0f, 0.0f ), Some( Array( 2.0f, 1.0f ) ))
+    val footpath        = new Element("Footpath",       false, new Color( 0.0f, 0.0f, 1.0f ), Some( Array( 2.0f, 1.0f ) ))
+    val railway         = new Element("Railway",        false, new Color( 0.0f, 0.0f, 0.0f ), Some( Array( 3.0f, 3.0f ) ))
+    val unknownLine     = new Element("Unknown line",   false, new Color( 0.7f, 0.7f, 0.7f ))
+    
+    val building        = new Element("Building",       true,  new Color( 0.9f, 0.9f, 0.9f ))
+    val woodland        = new Element("Woodland",       true,  new Color( 0.0f, 0.6f, 0.0f ))
+    val waterway        = new Element("Waterway",       true,  new Color( 0.5f, 0.5f, 1.0f ))
+    val greenspace      = new Element("Greenspace",     true,  new Color( 0.0f, 1.0f, 0.0f ))
+    val farmland        = new Element("Farmland",       true,  new Color( 0.5f, 0.3f, 0.3f ))
+}
+
 object TestRunner extends App
 {
     class Taggable
     {
+        var entityType = EntityType.unknown
+        
         var tags = immutable.HashSet[(String, String)]()
         var keys = immutable.HashMap[String, String]()
         def add( k : String, v : String )
