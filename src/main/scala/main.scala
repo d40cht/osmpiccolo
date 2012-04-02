@@ -14,7 +14,7 @@ import edu.umd.cs.piccolo.event.{PBasicInputEventHandler, PInputEvent}
 import scala.util.Random.{nextInt, nextFloat}
 import scala.collection.{mutable, immutable}
 
-import org.jgrapht._
+import org.jgrapht.graph._
 
 object EntityType extends Enumeration
 {
@@ -315,6 +315,49 @@ object TestRunner extends App
                 }
             }
         }            
+    }
+    
+    class GenerateRouteGraph( xf : XMLFilter )
+    {
+        type GraphT = SimpleWeightedGraph[Node, DefaultWeightedEdge]
+        
+        val graph = new GraphT(classOf[DefaultWeightedEdge])
+
+        def processWay( way : Way )
+        {
+            val lastIndex = way.nodes.length-1
+            val routeNodes = way.nodes.zipWithIndex.filter
+            {
+                case (n, i) => n.wayMembership > 1 || i==0 || i==lastIndex
+            }.map( _._1 )
+            
+            (routeNodes, routeNodes drop 1).zipped.foreach
+            {
+                case (first, second) =>
+                {
+                    // No penalty to adding vertices more than once
+                    graph.addVertex(first)
+                    graph.addVertex(second)
+                    
+                    val e = graph.addEdge( first, second )
+                    graph.setEdgeWeight(e, 1.0)
+                }
+            }
+        }
+
+        {
+            for ( w <- xf.ways )
+            {
+                if ( w.entityType == !w.nodes.isEmpty )
+                {
+                    w.entityType match
+                    {
+                        case (EntityType.highway|EntityType.cycleway|EntityType.footpath) => processWay(w)
+                        case _ =>
+                    }
+                }
+            }
+        }
     }
         
     override def main( args : Array[String] ) =
