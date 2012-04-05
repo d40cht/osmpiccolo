@@ -438,6 +438,61 @@ object TestRunner extends App
     {
         // Oxford
         val f = new XMLFilter( args(0), new Bounds(-1.4558, -1.1949, 51.6554, 51.8916) )
+
+        val gml =
+
+            <ogr:FeatureCollection
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns:ogr="http://ogr.maptools.org/"
+                 xmlns:gml="http://www.opengis.net/gml">
+            {
+                for ( (w, i) <- f.ways.zipWithIndex ) yield
+                {
+                    <gml:featureMember>
+                    {
+                        <ogr:unnamed>
+                            <ogr:geometryProperty>
+                            {
+                                if ( w.entityType.closed )
+                                {
+                                    <gml:Polygon>
+                                        <gml:outerBoundaryIs>
+                                            <gml:LinearRing>
+                                                <gml:coordinates>
+                                                {
+                                                    w.nodes.map( n => n.lon + "," + n.lat ).mkString(" ")
+                                                }
+                                                </gml:coordinates>
+                                            </gml:LinearRing>
+                                        </gml:outerBoundaryIs>
+                                    </gml:Polygon>
+                                }
+                                else
+                                {
+                                    <gml:LineString>
+                                        <gml:coordinates>
+                                        {
+                                            w.nodes.map( n => n.lon + "," + n.lat ).mkString(" ")
+                                        }
+                                        </gml:coordinates>
+                                    </gml:LineString>
+                                }
+                            }
+                            </ogr:geometryProperty>
+                            <ogr:cat>{i}</ogr:cat>
+                            <ogr:name>
+                            {
+                                if ( w.keys.contains("name") ) w.keys("name") else ""
+                            }
+                            </ogr:name>
+                        </ogr:unnamed>.copy(label=w.entityType.toString)
+                    }
+                    </gml:featureMember>
+                }
+            }
+            </ogr:FeatureCollection>
+        
+        scala.xml.XML.save("output.gml", gml)
         
         // Stockholm
         //val f = new XMLFilter( args(0), new Bounds(17.638, 18.47, 59.165, 59.502) )
@@ -445,8 +500,8 @@ object TestRunner extends App
         // West Chilterns
         //val f = new XMLFilter( args(0), new Bounds(-1.0436, -0.8356, 51.5668, 51.6656) )
         
-        val rg = new RouteGraph( f )
-        val c = new Canvas( f.nodes.view.map( _._2 ), f.ways, rg )
+        //val rg = new RouteGraph( f )
+        //val c = new Canvas( f.nodes.view.map( _._2 ), f.ways, rg )
     }
 }
 
