@@ -16,6 +16,8 @@ import scala.collection.{mutable, immutable}
 
 import org.jgrapht.graph._
 
+import org.geotools.coverage.grid.GridCoverage2D
+
 object EntityType extends Enumeration
 {
     import java.awt.Color
