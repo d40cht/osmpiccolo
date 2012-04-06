@@ -16,7 +16,9 @@ import scala.collection.{mutable, immutable}
 
 import org.jgrapht.graph._
 
-import org.geotools.coverage.grid.GridCoverage2D
+import org.geotools.coverage.grid.GridCoverageFactory
+import org.opengis.referencing.crs
+import org.geotools.geometry.DirectPosition2D
 
 object EntityType extends Enumeration
 {
@@ -439,7 +441,8 @@ object TestRunner extends App
     override def main( args : Array[String] ) =
     {
         // Oxford
-        val f = new XMLFilter( args(0), new Bounds(-1.4558, -1.1949, 51.6554, 51.8916) )
+        val b = new Bounds(-1.4558, -1.1949, 51.6554, 51.8916)
+        val f = new XMLFilter( args(0), b )
 
         val gml =
 
@@ -495,6 +498,16 @@ object TestRunner extends App
             </ogr:FeatureCollection>
         
         scala.xml.XML.save("output.gml", gml)
+        
+        val a = new GridCoverageFactory()
+        val gridValues = Array.tabulate( 1000, 1000 )( (x, y) => 0.0 )
+
+        val envelope = new Envelope2D( new GeographicCRS(),
+            new DirectPosition2D( b.lon1, b.lat1 ),
+            new DirectPosition2D( b.lon2, b.lat2 ) )
+            
+        val gridCoverage = a.create("thing", matrix, envelope )
+        
         
         // Stockholm
         //val f = new XMLFilter( args(0), new Bounds(17.638, 18.47, 59.165, 59.502) )
