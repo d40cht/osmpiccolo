@@ -17,8 +17,9 @@ import scala.collection.{mutable, immutable}
 import org.jgrapht.graph._
 
 import org.geotools.coverage.grid.GridCoverageFactory
-import org.opengis.referencing.crs
-import org.geotools.geometry.DirectPosition2D
+import org.opengis.referencing.crs._
+import org.geotools.referencing.crs._
+import org.geotools.geometry.{DirectPosition2D, Envelope2D}
 
 object EntityType extends Enumeration
 {
@@ -264,7 +265,7 @@ object TestRunner extends App
                         
                         if ( bounds.within( lat, lon ) )
                         {
-                            val nn = new Node( (lat-meanlat) * 30000.0, (lon-meanlon) * 30000.0 )
+                            val nn = new Node( lat, lon )
                             nodes += id -> nn
                             currTaggable = Some(nn)
                         }
@@ -441,7 +442,8 @@ object TestRunner extends App
     override def main( args : Array[String] ) =
     {
         // Oxford
-        val b = new Bounds(-1.4558, -1.1949, 51.6554, 51.8916)
+        //val b = new Bounds(-1.4558, -1.1949, 51.6554, 51.8916)
+        val b = new Bounds( -1.3743, -1.216, 51.735, 51.82 )
         val f = new XMLFilter( args(0), b )
 
         val gml =
@@ -499,15 +501,23 @@ object TestRunner extends App
         
         scala.xml.XML.save("output.gml", gml)
         
-        val a = new GridCoverageFactory()
-        val gridValues = Array.tabulate( 1000, 1000 )( (x, y) => 0.0 )
-
-        val envelope = new Envelope2D( new GeographicCRS(),
-            new DirectPosition2D( b.lon1, b.lat1 ),
-            new DirectPosition2D( b.lon2, b.lat2 ) )
+        {
+            import org.geotools.gce.geotiff.GeoTiffFormat
             
-        val gridCoverage = a.create("thing", matrix, envelope )
-        
+            val envelope = new Envelope2D(
+                new DirectPosition2D( DefaultGeographicCRS.WGS84, b.lon1, b.lat1 ),
+                new DirectPosition2D( DefaultGeographicCRS.WGS84, b.lon2, b.lat2 ) )
+                
+            val a = new GridCoverageFactory()
+            val gridValues = Array.tabulate( 1000, 1000 )( (x, y) => x.toFloat + y.toFloat )
+
+            val gridCoverage = a.create("agrid", gridValues, envelope )
+            
+            val outputFile = new java.io.File( "test.tiff" )
+            val format = new GeoTiffFormat()
+            val writer = format.getWriter(outputFile)
+            writer.write( gridCoverage, null )
+        }
         
         // Stockholm
         //val f = new XMLFilter( args(0), new Bounds(17.638, 18.47, 59.165, 59.502) )
