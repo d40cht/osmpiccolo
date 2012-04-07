@@ -4,10 +4,10 @@
     <mapcanvas>
         <units>degrees</units>
         <extent>
-            <xmin>-1.378258</xmin>
-            <ymin>51.723404</ymin>
-            <xmax>-1.212042</xmax>
-            <ymax>51.831596</ymax>
+            <xmin>-1.304539</xmin>
+            <ymin>51.784262</ymin>
+            <xmax>-1.274653</xmax>
+            <ymax>51.803715</ymax>
         </extent>
         <projections>0</projections>
         <destinationsrs>
@@ -24,49 +24,49 @@
         </destinationsrs>
     </mapcanvas>
     <legend>
-        <legendlayer open="true" checked="Qt::Checked" name="Railway" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Unchecked" name="Railway" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Railway20120405165846786" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="Railway20120405165846786" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Checked" name="Cycleway" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Unchecked" name="Cycleway" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Cycleway20120405165844253" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="Cycleway20120405165844253" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Checked" name="Footpath" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Unchecked" name="Footpath" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Footpath20120405165835043" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="Footpath20120405165835043" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Checked" name="Unknown" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Unchecked" name="Unknown" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Unknown20120405165833469" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="Unknown20120405165833469" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Checked" name="Highway" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Unchecked" name="Highway" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Highway20120405165831945" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="Highway20120405165831945" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Checked" name="Greenspace" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Unchecked" name="Greenspace" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Greenspace20120405165837731" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="Greenspace20120405165837731" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Checked" name="Waterway" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Unchecked" name="Waterway" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Waterway20120405165839836" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="Waterway20120405165839836" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Checked" name="Farmland" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Unchecked" name="Farmland" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Farmland20120405165849420" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="Farmland20120405165849420" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Checked" name="Woodland" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Unchecked" name="Woodland" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Woodland20120405165841911" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="Woodland20120405165841911" visible="0"/>
             </filegroup>
         </legendlayer>
         <legendlayer open="true" checked="Qt::Unchecked" name="Building" showFeatureCount="0">

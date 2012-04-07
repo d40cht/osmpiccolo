@@ -509,8 +509,20 @@ object TestRunner extends App
                 new DirectPosition2D( DefaultGeographicCRS.WGS84, b.lon2, b.lat2 ) )
                 
             val a = new GridCoverageFactory()
-            val gridValues = Array.tabulate( 1000, 1000 )( (x, y) => x.toFloat + y.toFloat )
+            val gridValues = Array.tabulate( 300, 300 )( (x, y) => 0.0f )
 
+            val gridCoverageook = a.create("agrid", gridValues, envelope )
+            
+            val geom = gridCoverageook.getGridGeometry()
+            for ( w <- f.ways if w.entityType == EntityType.cycleway )
+            {
+                for ( n <- w.nodes )
+                {
+                    val gc = geom.worldToGrid( new DirectPosition2D( DefaultGeographicCRS.WGS84, n.lon, n.lat ) )
+                    gridValues(gc.y)(gc.x) += 500.0f
+                }
+            }
+            
             val gridCoverage = a.create("agrid", gridValues, envelope )
             
             val outputFile = new java.io.File( "test.tiff" )
