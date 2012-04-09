@@ -445,6 +445,29 @@ object TestRunner extends App
         //val b = new Bounds(-1.4558, -1.1949, 51.6554, 51.8916)
         val b = new Bounds( -1.3743, -1.216, 51.735, 51.82 )
         val f = new XMLFilter( args(0), b )
+        
+        {
+            import org.geotools.geometry.jts.{JTSFactoryFinder}
+            import com.vividsolutions.jts.geom.{GeometryFactory, LinearRing, Coordinate}
+            
+            
+            val geometryFactory = JTSFactoryFinder.getGeometryFactory( null )
+            for ( w <- f.ways )
+            {
+                val coords = w.nodes.view.map( n => new Coordinate( n.lon, n.lat ) )
+                
+                if ( w.entityType.closed )
+                {
+                    val ring = geometryFactory.createLinearRing( coords.toArray )
+                    val holes : Array[LinearRing] = null
+                    val polygon = geometryFactory.createPolygon( ring, holes )
+                }
+                else
+                {   
+                    val line = geometryFactory.createLineString( coords.toArray )
+                }
+            }
+        }            
 
         val gml =
 
@@ -513,6 +536,7 @@ object TestRunner extends App
 
             val gridCoverageook = a.create("agrid", gridValues, envelope )
             
+            // More generally, use org.geotools.process.raster.VectorToRasterProcess
             val geom = gridCoverageook.getGridGeometry()
             for ( w <- f.ways if w.entityType == EntityType.cycleway )
             {

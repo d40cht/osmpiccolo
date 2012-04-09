@@ -22,7 +22,8 @@ object PiccoloBuild extends Build
                 "org.geotools" % "gt-main" % "2.7.4",
                 "org.geotools" % "gt-coverage" % "2.7.4",
                 "org.geotools" % "gt-geotiff" % "2.7.4",
-                "org.geotools" % "gt-opengis" % "2.7.4"
+                "org.geotools" % "gt-opengis" % "2.7.4",
+                "org.geotools" % "gt-process" % "2.7.4"
             ),
             resolvers += MavenRepository("osgeo","http://download.osgeo.org/webdav/geotools")
         )
