@@ -20,25 +20,27 @@ import org.geotools.coverage.grid.GridCoverageFactory
 import org.opengis.referencing.crs._
 import org.geotools.referencing.crs._
 import org.geotools.geometry.{DirectPosition2D, Envelope2D}
+import org.geotools.data.{DataUtilities}
+
 
 object EntityType extends Enumeration
 {
     import java.awt.Color
     
-    class Element( val name : String, val closed : Boolean, val routeable : Boolean, val color : java.awt.Color, val dashPattern : Option[Array[Float]] = None ) extends Val(name)
+    class Element( val name : String, val closed : Boolean, val routeable : Boolean, val color : java.awt.Color, val dashPattern : Option[Array[Float]] ) extends Val(name)
     
-    val unknown         = new Element("Unknown",        false, false, new Color( 0.7f, 0.4f, 0.7f ))
-    val highway         = new Element("Highway",        false, true,  new Color( 0.3f, 0.0f, 0.0f ))
+    val unknown         = new Element("Unknown",        false, false, new Color( 0.7f, 0.4f, 0.7f ), None)
+    val highway         = new Element("Highway",        false, true,  new Color( 0.3f, 0.0f, 0.0f ), None)
     val cycleway        = new Element("Cycleway",       false, true,  new Color( 0.0f, 1.0f, 0.0f ), Some( Array( 3.0f, 3.0f ) ))
     val footpath        = new Element("Footpath",       false, true,  new Color( 0.0f, 0.0f, 1.0f ), Some( Array( 3.0f, 3.0f ) ))
     val railway         = new Element("Railway",        false, false, new Color( 0.0f, 0.0f, 0.0f ), Some( Array( 4.0f, 4.0f ) ))
-    val unknownLine     = new Element("Unknown line",   false, false, new Color( 0.7f, 0.7f, 0.7f ))
+    val unknownLine     = new Element("Unknown line",   false, false, new Color( 0.7f, 0.7f, 0.7f ), None)
     
-    val building        = new Element("Building",       true,  false, new Color( 0.9f, 0.9f, 0.9f ))
-    val woodland        = new Element("Woodland",       true,  false, new Color( 0.0f, 0.6f, 0.0f ))
-    val waterway        = new Element("Waterway",       true,  false, new Color( 0.5f, 0.5f, 1.0f ))
-    val greenspace      = new Element("Greenspace",     true,  false, new Color( 0.0f, 1.0f, 0.0f ))
-    val farmland        = new Element("Farmland",       true,  false, new Color( 0.5f, 0.3f, 0.3f ))
+    val building        = new Element("Building",       true,  false, new Color( 0.9f, 0.9f, 0.9f ), None)
+    val woodland        = new Element("Woodland",       true,  false, new Color( 0.0f, 0.6f, 0.0f ), None)
+    val waterway        = new Element("Waterway",       true,  false, new Color( 0.5f, 0.5f, 1.0f ), None)
+    val greenspace      = new Element("Greenspace",     true,  false, new Color( 0.0f, 1.0f, 0.0f ), None)
+    val farmland        = new Element("Farmland",       true,  false, new Color( 0.5f, 0.3f, 0.3f ), None)
 }
 
 object TestRunner extends App
@@ -438,6 +440,11 @@ object TestRunner extends App
     
     //l = new LatLng(33.109283, -123.182312);
 
+    object GISTypes
+    {
+        val highway = DataUtilities.createType("Highway", "centerline:LineString,name:String" )
+    }
+
         
     override def main( args : Array[String] ) =
     {
@@ -446,11 +453,18 @@ object TestRunner extends App
         val b = new Bounds( -1.3743, -1.216, 51.735, 51.82 )
         val f = new XMLFilter( args(0), b )
         
+        
+        
         {
             import org.geotools.geometry.jts.{JTSFactoryFinder}
             import com.vividsolutions.jts.geom.{GeometryFactory, LinearRing, Coordinate}
+            import org.geotools.feature.simple.{SimpleFeatureBuilder}
+            import org.geotools.feature.{FeatureCollections}
+            import org.geotools.{GML}
             
-            
+         
+            val featureCollection = FeatureCollections.newCollection("lines")
+               
             val geometryFactory = JTSFactoryFinder.getGeometryFactory( null )
             for ( w <- f.ways )
             {
@@ -458,15 +472,39 @@ object TestRunner extends App
                 
                 if ( w.entityType.closed )
                 {
-                    val ring = geometryFactory.createLinearRing( coords.toArray )
+                    /*val ring = geometryFactory.createLinearRing( coords.toArray )
                     val holes : Array[LinearRing] = null
-                    val polygon = geometryFactory.createPolygon( ring, holes )
+                    val polygon = geometryFactory.createPolygon( ring, holes )*/
                 }
                 else
                 {   
                     val line = geometryFactory.createLineString( coords.toArray )
+                    val feature = SimpleFeatureBuilder.build(GISTypes.highway, Array[java.lang.Object](line, ""), null)
+                    featureCollection.add( feature )
                 }
             }
+            
+            val schemaFile = (new java.io.File("myschema.xsd")).getCanonicalFile()
+            schemaFile.createNewFile()
+            val schemaURL = schemaFile.toURI().toURL()
+            val baseURL = schemaFile.getParentFile().toURI().toURL()
+            
+            val xsd = new java.io.FileOutputStream(schemaFile)
+            val encode = new GML(GML.Version.WFS1_1)
+            encode.setBaseURL(baseURL)
+            encode.setNamespace("myschema", schemaURL.toExternalForm())
+            encode.encode(xsd, GISTypes.highway)
+            xsd.close()
+
+            
+            val op = new java.io.FileOutputStream( new java.io.File( "output2.gml" ) )
+            val encode2 = new GML(GML.Version.WFS1_1)
+            encode2.setBaseURL(baseURL)
+            encode2.setNamespace("myschema", "myschema.xsd")
+            encode2.encode( op, featureCollection )
+            op.close()
+            
+            
         }            
 
         val gml =
