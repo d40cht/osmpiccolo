@@ -492,7 +492,7 @@ object TestRunner extends App
             val xsd = new java.io.FileOutputStream(schemaFile)
             val encode = new GML(GML.Version.WFS1_1)
             encode.setBaseURL(baseURL)
-            encode.setNamespace("myschema", schemaURL.toExternalForm())
+            encode.setNamespace("highway", schemaURL.toExternalForm())
             encode.encode(xsd, GISTypes.highway)
             xsd.close()
 
@@ -500,7 +500,7 @@ object TestRunner extends App
             val op = new java.io.FileOutputStream( new java.io.File( "output2.gml" ) )
             val encode2 = new GML(GML.Version.WFS1_1)
             encode2.setBaseURL(baseURL)
-            encode2.setNamespace("myschema", "myschema.xsd")
+            encode2.setNamespace("highway", "myschema.xsd")
             encode2.encode( op, featureCollection )
             op.close()
             
