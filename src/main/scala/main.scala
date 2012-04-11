@@ -319,7 +319,7 @@ object TestRunner extends App
             val highway = w.has( "highway" )
             val building = w.has( "building" ) || w.has( "landuse", "residential" )
             val waterway = w.has( "waterway", "riverbank" ) || w.has("natural", "water") || w.has("natural", "coastline")
-            val garden = w.has("residential", "garden" ) || w.has("leisure", "common") || w.has("leisure", "park") || w.has("landuse", "grass") || w.has("landuse", "meadow") || w.has("leisure", "pitch") || w.has( "leisure", "recreation_ground") || w.has( "landuse", "recreation_ground") || w.has( "landuse", "farmland") || w.has( "leisure", "nature_reserve")
+            val garden = w.has("residential", "garden" ) || w.has("leisure", "common") || w.has("leisure", "park") || w.has("landuse", "grass") || w.has("landuse", "meadow") || w.has("leisure", "pitch") || w.has( "leisure", "recreation_ground") || w.has( "landuse", "recreation_ground") || w.has( "landuse", "farmland") || w.has( "leisure", "nature_reserve") || w.has( "landuse", "orchard") || w.has( "landuse", "vineyard")
             val field = w.has("landuse", "field") || w.has("landuse", "farm")
             val railway = w.has("railway")
             val closed = wood || building || waterway || garden || field
@@ -474,6 +474,12 @@ object TestRunner extends App
             
                
             val geometryFactory = JTSFactoryFinder.getGeometryFactory( null )
+            
+            // Additionally, for nodes/ways: key=historic, amenity=bar/pub/cafe/restaurant
+            // building=cathedral/chapel/church, craft=?, geological=?, mountain_pass=yes,
+            // man_made=adit/lighthouse/pier/watermill/water_well/windmill
+            // natural=?, railway=abandoned/disused/funicular
+            // route=?, tourism=?, waterway=?(not ditch/drain)
             for ( w <- f.ways )
             {
                 val coords = w.nodes.view.map( n => new Coordinate( n.lon, n.lat ) ).toList
@@ -482,6 +488,8 @@ object TestRunner extends App
                 {
                     case EntityType.highway    => -20000.0
                     case EntityType.building   => -2000.0
+                    case EntityType.cycleway   => 2000.0
+                    case EntityType.footpath   => 2000.0
                     case EntityType.woodland   => 5000.0
                     case EntityType.waterway   => 5000.0
                     case EntityType.greenspace => 3000.0
@@ -666,7 +674,7 @@ object TestRunner extends App
             
             val cparams = df.getOperation("Convolve").getParameters()
             cparams.parameter("Source").setValue(gridCoverage)
-            cparams.parameter("kernel").setValue( makeGaussianKernel(20) )
+            cparams.parameter("kernel").setValue( makeGaussianKernel(40) )
             
             val convolved = convolver.doOperation(cparams, null).asInstanceOf[GridCoverage2D]
             
@@ -674,6 +682,9 @@ object TestRunner extends App
             val format = new GeoTiffFormat()
             val writer = format.getWriter(outputFile)
             writer.write( convolved, null )
+            
+            // Now step along each way, one by one sampling equally spaced points
+            // using LengthIndexedLine (for both weight and SRTM rasters)
         }
         
         // Stockholm
