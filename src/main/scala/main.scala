@@ -30,7 +30,8 @@ object EntityType extends Enumeration
     class Element( val name : String, val closed : Boolean, val routeable : Boolean, val color : java.awt.Color, val dashPattern : Option[Array[Float]] ) extends Val(name)
     
     val unknown         = new Element("Unknown",        false, false, new Color( 0.7f, 0.4f, 0.7f ), None)
-    val highway         = new Element("Highway",        false, true,  new Color( 0.3f, 0.0f, 0.0f ), None)
+    val highway         = new Element("Highway",        false, true,  new Color( 0.6f, 0.0f, 0.0f ), None)
+    val road            = new Element("Road",           false, true,  new Color( 0.3f, 0.0f, 0.0f ), None)
     val cycleway        = new Element("Cycleway",       false, true,  new Color( 0.0f, 1.0f, 0.0f ), Some( Array( 3.0f, 3.0f ) ))
     val footpath        = new Element("Footpath",       false, true,  new Color( 0.0f, 0.0f, 1.0f ), Some( Array( 3.0f, 3.0f ) ))
     val railway         = new Element("Railway",        false, false, new Color( 0.0f, 0.0f, 0.0f ), Some( Array( 4.0f, 4.0f ) ))
@@ -334,9 +335,10 @@ object TestRunner extends App
             {
                 w.keys("highway") match
                 {
-                    case ("path"|"track"|"footway"|"bridleway") => EntityType.footpath
-                    case "cycleway" => EntityType.cycleway
-                    case _ => EntityType.highway
+                    case ("path"|"track"|"footway"|"bridleway"|"pedestrian")    => EntityType.footpath
+                    case "cycleway"                                             => EntityType.cycleway
+                    case ("motorway"|"trunk"|"primary")                         => EntityType.highway
+                    case _ => EntityType.road
                 }
                
             }
@@ -443,8 +445,8 @@ object TestRunner extends App
     object GISTypes
     {
         // 4326 is WGS84
-        val highwayBase = DataUtilities.createType("highway", "centerline:LineString:srid=4326,name:String" )
-        val highway = DataUtilities.createSubType( highwayBase, null, DefaultGeographicCRS.WGS84 )
+        val line = DataUtilities.createType("line", "centerline:LineString:srid=4326,weight:Float" )
+        val shape = DataUtilities.createType("shape", "geom:Polygon:srid=4326,weight:Float" )
         //val highway = DataUtilities.createType("shape", "centerline:LineString,name:String" )
     }
 
@@ -476,20 +478,34 @@ object TestRunner extends App
             {
                 val coords = w.nodes.view.map( n => new Coordinate( n.lon, n.lat ) ).toList
                 
-                /*if ( w.entityType.closed )
+                val weight = w.entityType match
                 {
-                    //val ring = geometryFactory.createLinearRing( (coords ++ List( coords.head )).toArray )
-                    //val holes : Array[LinearRing] = null
-                    //val polygon = geometryFactory.createPolygon( ring, holes )
-                    //val feature = SimpleFeatureBuilder.build(GISTypes.highway, Array[java.lang.Object](line, ""), null)
-                    //featureCollection.add( feature )
+                    case EntityType.highway    => -20000.0
+                    case EntityType.building   => -2000.0
+                    case EntityType.woodland   => 5000.0
+                    case EntityType.waterway   => 5000.0
+                    case EntityType.greenspace => 3000.0
+                    case EntityType.farmland   => 2000.0
+                    case _ => 0.0
                 }
-                else*/
-                if ( w.entityType == EntityType.highway )
-                {   
-                    val line = geometryFactory.createLineString( coords.toArray )
-                    val feature = SimpleFeatureBuilder.build(GISTypes.highway, Array[java.lang.Object](line, ""), null)
-                    featureCollection.add( feature )
+                
+                
+                if ( weight != 0.0 )
+                {
+                    if ( w.entityType.closed )
+                    {
+                        val ring = geometryFactory.createLinearRing( (coords ++ List( coords.head )).toArray )
+                        val holes : Array[LinearRing] = null
+                        val polygon = geometryFactory.createPolygon( ring, holes )
+                        val feature = SimpleFeatureBuilder.build(GISTypes.shape, Array[java.lang.Object](polygon, new java.lang.Float(weight)), null)
+                        featureCollection.add( feature )
+                    }
+                    else
+                    {   
+                        val line = geometryFactory.createLineString( coords.toArray )
+                        val feature = SimpleFeatureBuilder.build(GISTypes.line, Array[java.lang.Object](line, new java.lang.Float(weight)), null)
+                        featureCollection.add( feature )
+                    }
                 }
             }
             
@@ -632,15 +648,17 @@ object TestRunner extends App
             
             import org.geotools.gce.geotiff.GeoTiffFormat
             
-            val envelope = new Envelope2D(
-                new DirectPosition2D( DefaultGeographicCRS.WGS84, b.lon1, b.lat1 ),
-                new DirectPosition2D( DefaultGeographicCRS.WGS84, b.lon2, b.lat2 ) )
+            //val envelope = new Envelope2D(
+            //    new DirectPosition2D( DefaultGeographicCRS.WGS84, b.lon1, b.lat1 ),
+            //    new DirectPosition2D( DefaultGeographicCRS.WGS84, b.lon2, b.lat2 ) )
+            val envelope = featureCollection.getBounds()
                 
             
-            import org.geotools.filter.ConstantExpression
+            import org.geotools.filter.{ConstantExpression, AttributeExpressionImpl}
             import org.geotools.process.raster.VectorToRasterProcess
             
-            val gridCoverage = VectorToRasterProcess.process( featureCollection, ConstantExpression.constant(20000.0), new java.awt.Dimension( 1000, 1000 ), envelope, "agrid", null )
+            //val gridCoverage = VectorToRasterProcess.process( featureCollection, ConstantExpression.constant(20000.0), new java.awt.Dimension( 1000, 1000 ), envelope, "agrid", null )
+            val gridCoverage = VectorToRasterProcess.process( featureCollection, new AttributeExpressionImpl("weight"), new java.awt.Dimension( 1000, 1000 ), envelope, "agrid", null )
             
 
             val df = new org.geotools.coverage.processing.CoverageProcessor()
