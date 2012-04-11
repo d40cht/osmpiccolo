@@ -16,7 +16,7 @@ import scala.collection.{mutable, immutable}
 
 import org.jgrapht.graph._
 
-import org.geotools.coverage.grid.GridCoverageFactory
+import org.geotools.coverage.grid.{GridCoverageFactory, GridCoverage2D}
 import org.opengis.referencing.crs._
 import org.geotools.referencing.crs._
 import org.geotools.geometry.{DirectPosition2D, Envelope2D}
@@ -442,7 +442,10 @@ object TestRunner extends App
 
     object GISTypes
     {
-        val highway = DataUtilities.createType("Highway", "centerline:LineString,name:String" )
+        // 4326 is WGS84
+        val highwayBase = DataUtilities.createType("highway", "centerline:LineString:srid=4326,name:String" )
+        val highway = DataUtilities.createSubType( highwayBase, null, DefaultGeographicCRS.WGS84 )
+        //val highway = DataUtilities.createType("shape", "centerline:LineString,name:String" )
     }
 
         
@@ -454,29 +457,35 @@ object TestRunner extends App
         val f = new XMLFilter( args(0), b )
         
         
+        import org.geotools.feature.{FeatureCollections}
+        val featureCollection = FeatureCollections.newCollection("lines")
         
         {
             import org.geotools.geometry.jts.{JTSFactoryFinder}
             import com.vividsolutions.jts.geom.{GeometryFactory, LinearRing, Coordinate}
             import org.geotools.feature.simple.{SimpleFeatureBuilder}
-            import org.geotools.feature.{FeatureCollections}
+            
             import org.geotools.{GML}
+            import org.geotools.gml.producer.{FeatureTransformer}
             
          
-            val featureCollection = FeatureCollections.newCollection("lines")
+            
                
             val geometryFactory = JTSFactoryFinder.getGeometryFactory( null )
             for ( w <- f.ways )
             {
-                val coords = w.nodes.view.map( n => new Coordinate( n.lon, n.lat ) )
+                val coords = w.nodes.view.map( n => new Coordinate( n.lon, n.lat ) ).toList
                 
-                if ( w.entityType.closed )
+                /*if ( w.entityType.closed )
                 {
-                    /*val ring = geometryFactory.createLinearRing( coords.toArray )
-                    val holes : Array[LinearRing] = null
-                    val polygon = geometryFactory.createPolygon( ring, holes )*/
+                    //val ring = geometryFactory.createLinearRing( (coords ++ List( coords.head )).toArray )
+                    //val holes : Array[LinearRing] = null
+                    //val polygon = geometryFactory.createPolygon( ring, holes )
+                    //val feature = SimpleFeatureBuilder.build(GISTypes.highway, Array[java.lang.Object](line, ""), null)
+                    //featureCollection.add( feature )
                 }
-                else
+                else*/
+                if ( w.entityType == EntityType.highway )
                 {   
                     val line = geometryFactory.createLineString( coords.toArray )
                     val feature = SimpleFeatureBuilder.build(GISTypes.highway, Array[java.lang.Object](line, ""), null)
@@ -484,6 +493,8 @@ object TestRunner extends App
                 }
             }
             
+            // The following functionality in Geotools is a combination of badly documented and badly broken. Lovely.
+            /*
             val schemaFile = (new java.io.File("myschema.xsd")).getCanonicalFile()
             schemaFile.createNewFile()
             val schemaURL = schemaFile.toURI().toURL()
@@ -491,18 +502,46 @@ object TestRunner extends App
             
             val xsd = new java.io.FileOutputStream(schemaFile)
             val encode = new GML(GML.Version.WFS1_1)
+            
             encode.setBaseURL(baseURL)
-            encode.setNamespace("highway", schemaURL.toExternalForm())
+            encode.setNamespace("awosm", schemaURL.toExternalForm())
             encode.encode(xsd, GISTypes.highway)
             xsd.close()
 
+
+            val transform = new FeatureTransformer()
+            //transform.setEncoding(charset)
+            transform.setIndentation(4)
+            transform.setGmlPrefixing(true)
+            
+            val schema = featureCollection.getSchema()
+            val prefix = schema.getUserData().get("prefix").asInstanceOf[String]
+            val namespace = schema.getName().getNamespaceURI()
+            transform.getFeatureTypeNamespaces().declareDefaultNamespace(prefix, namespace)
+            transform.addSchemaLocation(prefix, namespace)
+            
+            //String srsName = CRS.toSRS(schema.getCoordinateReferenceSystem());
+            //if (srsName != null) {
+            //    transform.setSrsName(srsName);
+            //}
+            
+            // define feature collection
+            transform.setCollectionPrefix(prefix);
+            transform.setCollectionNamespace(namespace);
+            
+            // other configuration
+            transform.setCollectionBounding(true); // include bbox info
             
             val op = new java.io.FileOutputStream( new java.io.File( "output2.gml" ) )
-            val encode2 = new GML(GML.Version.WFS1_1)
-            encode2.setBaseURL(baseURL)
-            encode2.setNamespace("highway", "myschema.xsd")
-            encode2.encode( op, featureCollection )
-            op.close()
+            transform.transform(featureCollection, op);
+            
+            //val op = new java.io.FileOutputStream( new java.io.File( "output2.gml" ) )
+            //val encode2 = new GML(GML.Version.WFS1_1)
+            //encode2.setBaseURL(baseURL)
+            //encode2.setNamespace("awosm", "myschema.xsd")
+            //encode2.encode( op, featureCollection )
+            //op.close()
+            */
             
             
         }            
@@ -563,34 +602,60 @@ object TestRunner extends App
         scala.xml.XML.save("output.gml", gml)
         
         {
+            import javax.media.jai.{KernelJAI}
+            
+            def makeGaussianKernel( radius : Int ) : KernelJAI = 
+            {
+                val diameter = 2*radius + 1
+                val invrsq = 1.0F/(radius*radius)
+
+                val gaussianData = new Array[Float](diameter)
+
+                var sum = 0.0F
+                for ( i <- 0 until diameter )
+                {
+                    val d = i - radius;
+                    val v = Math.exp(-d*d*invrsq).toFloat
+                    gaussianData(i) = v
+                    sum += v
+                }
+
+                // Normalize
+                val invsum = 1.0F/sum;
+                for ( i <- 0 until diameter )
+                {
+                    gaussianData(i) *= invsum;
+                }
+
+                new KernelJAI(diameter, diameter, radius, radius, gaussianData, gaussianData)
+            }
+            
             import org.geotools.gce.geotiff.GeoTiffFormat
             
             val envelope = new Envelope2D(
                 new DirectPosition2D( DefaultGeographicCRS.WGS84, b.lon1, b.lat1 ),
                 new DirectPosition2D( DefaultGeographicCRS.WGS84, b.lon2, b.lat2 ) )
                 
-            val a = new GridCoverageFactory()
-            val gridValues = Array.tabulate( 300, 300 )( (x, y) => 0.0f )
+            
+            import org.geotools.filter.ConstantExpression
+            import org.geotools.process.raster.VectorToRasterProcess
+            
+            val gridCoverage = VectorToRasterProcess.process( featureCollection, ConstantExpression.constant(20000.0), new java.awt.Dimension( 1000, 1000 ), envelope, "agrid", null )
+            
 
-            val gridCoverageook = a.create("agrid", gridValues, envelope )
+            val df = new org.geotools.coverage.processing.CoverageProcessor()
+            val convolver = new org.geotools.coverage.processing.operation.Convolve()
             
-            // More generally, use org.geotools.process.raster.VectorToRasterProcess
-            val geom = gridCoverageook.getGridGeometry()
-            for ( w <- f.ways if w.entityType == EntityType.cycleway )
-            {
-                for ( n <- w.nodes )
-                {
-                    val gc = geom.worldToGrid( new DirectPosition2D( DefaultGeographicCRS.WGS84, n.lon, n.lat ) )
-                    gridValues(gc.y)(gc.x) += 500.0f
-                }
-            }
+            val cparams = df.getOperation("Convolve").getParameters()
+            cparams.parameter("Source").setValue(gridCoverage)
+            cparams.parameter("kernel").setValue( makeGaussianKernel(20) )
             
-            val gridCoverage = a.create("agrid", gridValues, envelope )
+            val convolved = convolver.doOperation(cparams, null).asInstanceOf[GridCoverage2D]
             
             val outputFile = new java.io.File( "test.tiff" )
             val format = new GeoTiffFormat()
             val writer = format.getWriter(outputFile)
-            writer.write( gridCoverage, null )
+            writer.write( convolved, null )
         }
         
         // Stockholm

@@ -25,7 +25,8 @@ object PiccoloBuild extends Build
                 "org.geotools" % "gt-opengis" % "2.7.4",
                 "org.geotools" % "gt-process" % "2.7.4",
                 "xml-apis" % "xml-apis-xerces" % "2.7.1" from "http://download.osgeo.org/webdav/xml-apis/xml-apis-xerces/2.7.1/xml-apis-xerces-2.7.1.jar",
-                "org.geotools" % "gt-xml" % "2.7.4"
+                "org.geotools" % "gt-xml" % "2.7.4",
+                "org.geotools" % "gt-epsg-hsql" % "2.7.4"
             ),
             resolvers += MavenRepository("osgeo","http://download.osgeo.org/webdav/geotools"),
             ivyXML :=
