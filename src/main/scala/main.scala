@@ -337,7 +337,7 @@ object TestRunner extends App
                 {
                     case ("path"|"track"|"footway"|"bridleway"|"pedestrian")    => EntityType.footpath
                     case "cycleway"                                             => EntityType.cycleway
-                    case ("motorway"|"trunk"|"primary")                         => EntityType.highway
+                    case ("motorway"|"trunk"|"primary"|"secondary")             => EntityType.highway
                     case _ => EntityType.road
                 }
                
@@ -419,6 +419,7 @@ object TestRunner extends App
                 {
                     graph.addVertex(n)
                     
+                    // Step along this route sampling the heat map using LengthIndexedLine
                     lastRouteNode.foreach( lrn =>
                     {
                         if ( lrn != n )
@@ -486,10 +487,8 @@ object TestRunner extends App
                 
                 val weight = w.entityType match
                 {
-                    case EntityType.highway    => -20000.0
+                    case EntityType.highway    => -100000.0
                     case EntityType.building   => -2000.0
-                    case EntityType.cycleway   => 2000.0
-                    case EntityType.footpath   => 2000.0
                     case EntityType.woodland   => 5000.0
                     case EntityType.waterway   => 5000.0
                     case EntityType.greenspace => 3000.0
