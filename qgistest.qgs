@@ -4,10 +4,10 @@
     <mapcanvas>
         <units>degrees</units>
         <extent>
-            <xmin>-1.373788</xmin>
-            <ymin>51.729439</ymin>
-            <xmax>-1.215682</xmax>
-            <ymax>51.827584</ymax>
+            <xmin>-1.331746</xmin>
+            <ymin>51.741348</ymin>
+            <xmax>-1.252693</xmax>
+            <ymax>51.792805</ymax>
         </extent>
         <projections>0</projections>
         <destinationsrs>
@@ -34,9 +34,9 @@
                 <legendlayerfile isInOverview="0" layerid="Cycleway20120411214815646" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Checked" name="Highway" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Unchecked" name="Highway" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Highway20120411214805345" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="Highway20120411214805345" visible="0"/>
             </filegroup>
         </legendlayer>
         <legendlayer open="true" checked="Qt::Unchecked" name="Road" showFeatureCount="0">
@@ -74,13 +74,18 @@
                 <legendlayerfile isInOverview="0" layerid="Woodland20120411214812973" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Checked" name="test" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Unchecked" name="test" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="test20120411214725707" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="test20120411214725707" visible="0"/>
+            </filegroup>
+        </legendlayer>
+        <legendlayer open="true" checked="Qt::Checked" name="test2" showFeatureCount="0">
+            <filegroup open="true" hidden="false">
+                <legendlayerfile isInOverview="0" layerid="test220120412221243408" visible="1"/>
             </filegroup>
         </legendlayer>
     </legend>
-    <projectlayers layercount="11">
+    <projectlayers layercount="12">
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Polygon" type="vector" hasScaleBasedVisibilityFlag="0">
             <id>Building20120411214755218</id>
             <datasource>./output.gml|layername=Building</datasource>
@@ -763,7 +768,55 @@
             <provider>gdal</provider>
             <rasterproperties>
                 <mDrawingStyle>SingleBandPseudoColor</mDrawingStyle>
-                <mColorShadingAlgorithm>PseudoColorShader</mColorShadingAlgorithm>
+                <mColorShadingAlgorithm>FreakOutShader</mColorShadingAlgorithm>
+                <mInvertColor boolean="false"/>
+                <mRedBandName>Not Set</mRedBandName>
+                <mGreenBandName>Not Set</mGreenBandName>
+                <mBlueBandName>Not Set</mBlueBandName>
+                <mGrayBandName>Band 1</mGrayBandName>
+                <mStandardDeviations>0</mStandardDeviations>
+                <mUserDefinedRGBMinimumMaximum boolean="false"/>
+                <mRGBMinimumMaximumEstimated boolean="true"/>
+                <mUserDefinedGrayMinimumMaximum boolean="false"/>
+                <mGrayMinimumMaximumEstimated boolean="true"/>
+                <mContrastEnhancementAlgorithm>NoEnhancement</mContrastEnhancementAlgorithm>
+                <contrastEnhancementMinMaxValues>
+                    <minMaxEntry>
+                        <min>-3.40282e+38</min>
+                        <max>3.40282e+38</max>
+                    </minMaxEntry>
+                </contrastEnhancementMinMaxValues>
+                <mNoDataValue mValidNoDataValue="true">2147480000.000000</mNoDataValue>
+                <singleValuePixelList>
+                    <pixelListEntry pixelValue="2147480000.000000" percentTransparent="100"/>
+                </singleValuePixelList>
+                <threeValuePixelList>
+                    <pixelListEntry red="2147483647.000000" blue="2147483647.000000" green="2147483647.000000" percentTransparent="100"/>
+                </threeValuePixelList>
+            </rasterproperties>
+        </maplayer>
+        <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
+            <id>test220120412221243408</id>
+            <datasource>./test2.tiff</datasource>
+            <layername>test2</layername>
+            <srs>
+                <spatialrefsys>
+                    <proj4>+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs</proj4>
+                    <srsid>3452</srsid>
+                    <srid>4326</srid>
+                    <authid>EPSG:4326</authid>
+                    <description>WGS 84</description>
+                    <projectionacronym>longlat</projectionacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
+                    <geographicflag>true</geographicflag>
+                </spatialrefsys>
+            </srs>
+            <transparencyLevelInt>255</transparencyLevelInt>
+            <customproperties/>
+            <provider>gdal</provider>
+            <rasterproperties>
+                <mDrawingStyle>SingleBandPseudoColor</mDrawingStyle>
+                <mColorShadingAlgorithm>FreakOutShader</mColorShadingAlgorithm>
                 <mInvertColor boolean="false"/>
                 <mRedBandName>Not Set</mRedBandName>
                 <mGreenBandName>Not Set</mGreenBandName>

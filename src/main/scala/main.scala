@@ -266,7 +266,7 @@ object TestRunner extends App
                         val lat = attrs("lat").text.toDouble
                         val lon = attrs("lon").text.toDouble
                         
-                        if ( bounds.within( lat, lon ) )
+                        //if ( bounds.within( lat, lon ) )
                         {
                             val nn = new Node( lat, lon )
                             nodes += id -> nn
@@ -318,7 +318,7 @@ object TestRunner extends App
             val wood = w.has( "natural", "wood" ) || w.has( "landuse", "forest" )
             val highway = w.has( "highway" )
             val building = w.has( "building" ) || w.has( "landuse", "residential" )
-            val waterway = w.has( "waterway", "riverbank" ) || w.has("natural", "water") || w.has("natural", "coastline")
+            val waterway = w.has( "waterway", "riverbank" ) || w.has( "waterway", "canal" ) || w.has("natural", "water") || w.has("natural", "coastline")
             val garden = w.has("residential", "garden" ) || w.has("leisure", "common") || w.has("leisure", "park") || w.has("landuse", "grass") || w.has("landuse", "meadow") || w.has("leisure", "pitch") || w.has( "leisure", "recreation_ground") || w.has( "landuse", "recreation_ground") || w.has( "landuse", "farmland") || w.has( "leisure", "nature_reserve") || w.has( "landuse", "orchard") || w.has( "landuse", "vineyard")
             val field = w.has("landuse", "field") || w.has("landuse", "farm")
             val railway = w.has("railway")
@@ -450,6 +450,57 @@ object TestRunner extends App
         val shape = DataUtilities.createType("shape", "geom:Polygon:srid=4326,weight:Float" )
         //val highway = DataUtilities.createType("shape", "centerline:LineString,name:String" )
     }
+    
+    def weightWay( way : Way, heatMap : GridCoverage2D, resultArray : Array[Array[Float]] )
+    {
+        import org.geotools.geometry.{DirectPosition2D}
+        import org.geotools.geometry.jts.{JTSFactoryFinder}
+        import com.vividsolutions.jts.geom.{GeometryFactory, Coordinate}
+        import com.vividsolutions.jts.linearref.LengthIndexedLine
+        
+        val lastIndex = way.nodes.length-1
+        var currPoints = mutable.ArrayBuffer[Coordinate]()
+        
+        val envelope = heatMap.getEnvelope2D()
+        val geometryFactory = JTSFactoryFinder.getGeometryFactory( null )
+        val gridGeom = heatMap.getGridGeometry()
+        for ( (n, i) <- way.nodes.zipWithIndex )
+        {
+            val currCoord = new Coordinate( n.lon, n.lat )
+            currPoints.append( currCoord )
+            
+            val isRouteNode = n.wayMembership > 1 || i==lastIndex
+            if ( isRouteNode )
+            {
+                if ( currPoints.size > 2 )
+                {
+                    val line = geometryFactory.createLineString( currPoints.toArray )
+                    
+                    // Step along this route sampling the heat map using LengthIndexedLine
+                    val lil = new LengthIndexedLine(line)
+                    
+                    var index = 0.0
+                    val endIndex = lil.getEndIndex()
+                    while (index < endIndex)
+                    {
+                        val coords = lil.extractPoint(index)
+                        val dp = new DirectPosition2D( coords.x, coords.y )
+                        val res = Array[Float](0.0f)
+                        if ( envelope.contains(dp) )
+                        {
+                            heatMap.evaluate(dp.asInstanceOf[java.awt.geom.Point2D], res)
+                            val gridPos = gridGeom.worldToGrid(dp)
+                            resultArray(gridPos.y)(gridPos.x) += res(0)
+                        }
+                        index += 0.0002
+                    }
+                }
+                
+                currPoints.clear()
+                currPoints.append( currCoord )
+            }
+        }
+    }
 
         
     override def main( args : Array[String] ) =
@@ -490,7 +541,7 @@ object TestRunner extends App
                     case EntityType.highway    => -100000.0
                     case EntityType.building   => -2000.0
                     case EntityType.woodland   => 5000.0
-                    case EntityType.waterway   => 5000.0
+                    case EntityType.waterway   => 50000.0
                     case EntityType.greenspace => 3000.0
                     case EntityType.farmland   => 2000.0
                     case _ => 0.0
@@ -499,7 +550,7 @@ object TestRunner extends App
                 
                 if ( weight != 0.0 )
                 {
-                    if ( w.entityType.closed )
+                    if ( w.entityType.closed && w.entityType != EntityType.waterway )
                     {
                         val ring = geometryFactory.createLinearRing( (coords ++ List( coords.head )).toArray )
                         val holes : Array[LinearRing] = null
@@ -638,7 +689,7 @@ object TestRunner extends App
                 for ( i <- 0 until diameter )
                 {
                     val d = i - radius;
-                    val v = Math.exp(-d*d*invrsq).toFloat
+                    val v = scala.math.exp(-d*d*invrsq).toFloat
                     gaussianData(i) = v
                     sum += v
                 }
@@ -673,17 +724,31 @@ object TestRunner extends App
             
             val cparams = df.getOperation("Convolve").getParameters()
             cparams.parameter("Source").setValue(gridCoverage)
-            cparams.parameter("kernel").setValue( makeGaussianKernel(40) )
+            cparams.parameter("kernel").setValue( makeGaussianKernel(20) )
             
             val convolved = convolver.doOperation(cparams, null).asInstanceOf[GridCoverage2D]
             
-            val outputFile = new java.io.File( "test.tiff" )
-            val format = new GeoTiffFormat()
-            val writer = format.getWriter(outputFile)
-            writer.write( convolved, null )
+            def writeTiff( fileName : String, coverage : GridCoverage2D )
+            {
+                val outputFile = new java.io.File( fileName )
+                val format = new GeoTiffFormat()
+                val writer = format.getWriter(outputFile)
+                writer.write( coverage, null )
+            }
+            
+            writeTiff( "test.tiff", convolved )
             
             // Now step along each way, one by one sampling equally spaced points
             // using LengthIndexedLine (for both weight and SRTM rasters)
+            val resultArray = Array.tabulate( 1000, 1000 )( (x, y) => 0.0f )
+            for ( w <- f.ways if w.entityType == EntityType.footpath || w.entityType == EntityType.cycleway )
+            {
+                weightWay( w, convolved, resultArray )
+            }
+            
+            val gcf = new GridCoverageFactory()
+            val resultGrid = gcf.create( "agrid2", resultArray, convolved.getEnvelope2D() )
+            writeTiff( "test2.tiff", resultGrid )
         }
         
         // Stockholm
