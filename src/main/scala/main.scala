@@ -566,58 +566,6 @@ object TestRunner extends App
                     }
                 }
             }
-            
-            // The following functionality in Geotools is a combination of badly documented and badly broken. Lovely.
-            /*
-            val schemaFile = (new java.io.File("myschema.xsd")).getCanonicalFile()
-            schemaFile.createNewFile()
-            val schemaURL = schemaFile.toURI().toURL()
-            val baseURL = schemaFile.getParentFile().toURI().toURL()
-            
-            val xsd = new java.io.FileOutputStream(schemaFile)
-            val encode = new GML(GML.Version.WFS1_1)
-            
-            encode.setBaseURL(baseURL)
-            encode.setNamespace("awosm", schemaURL.toExternalForm())
-            encode.encode(xsd, GISTypes.highway)
-            xsd.close()
-
-
-            val transform = new FeatureTransformer()
-            //transform.setEncoding(charset)
-            transform.setIndentation(4)
-            transform.setGmlPrefixing(true)
-            
-            val schema = featureCollection.getSchema()
-            val prefix = schema.getUserData().get("prefix").asInstanceOf[String]
-            val namespace = schema.getName().getNamespaceURI()
-            transform.getFeatureTypeNamespaces().declareDefaultNamespace(prefix, namespace)
-            transform.addSchemaLocation(prefix, namespace)
-            
-            //String srsName = CRS.toSRS(schema.getCoordinateReferenceSystem());
-            //if (srsName != null) {
-            //    transform.setSrsName(srsName);
-            //}
-            
-            // define feature collection
-            transform.setCollectionPrefix(prefix);
-            transform.setCollectionNamespace(namespace);
-            
-            // other configuration
-            transform.setCollectionBounding(true); // include bbox info
-            
-            val op = new java.io.FileOutputStream( new java.io.File( "output2.gml" ) )
-            transform.transform(featureCollection, op);
-            
-            //val op = new java.io.FileOutputStream( new java.io.File( "output2.gml" ) )
-            //val encode2 = new GML(GML.Version.WFS1_1)
-            //encode2.setBaseURL(baseURL)
-            //encode2.setNamespace("awosm", "myschema.xsd")
-            //encode2.encode( op, featureCollection )
-            //op.close()
-            */
-            
-            
         }            
 
         val gml =
