@@ -315,10 +315,13 @@ object TestRunner extends App
         
         private def wayType( w : Way ) =
         {
+            // leisure:nature_reserve, tourism:viewpoint, natural:cliff, natural:cave_entrance,
+            // natural:peak, waterway:waterfall
+            // oneway:yes
             val wood = w.has( "natural", "wood" ) || w.has( "landuse", "forest" )
             val highway = w.has( "highway" )
             val building = w.has( "building" ) || w.has( "landuse", "residential" )
-            val waterway = w.has( "waterway", "riverbank" ) || w.has( "waterway", "canal" ) || w.has("natural", "water") || w.has("natural", "coastline")
+            val waterway = w.has( "waterway", "riverbank" ) || w.has( "waterway", "canal" ) || w.has( "waterway", "stream" ) || w.has("natural", "water") || w.has("natural", "coastline")
             val garden = w.has("residential", "garden" ) || w.has("leisure", "common") || w.has("leisure", "park") || w.has("landuse", "grass") || w.has("landuse", "meadow") || w.has("leisure", "pitch") || w.has( "leisure", "recreation_ground") || w.has( "landuse", "recreation_ground") || w.has( "landuse", "farmland") || w.has( "leisure", "nature_reserve") || w.has( "landuse", "orchard") || w.has( "landuse", "vineyard")
             val field = w.has("landuse", "field") || w.has("landuse", "farm")
             val railway = w.has("railway")
@@ -527,6 +530,10 @@ object TestRunner extends App
                
             val geometryFactory = JTSFactoryFinder.getGeometryFactory( null )
             
+            // In rural areas with no forest/lakes/other big features labelled, upweight for
+            // things like cattle grids, stiles, bridleway, regional walking route
+            // archaeological
+            
             // Additionally, for nodes/ways: key=historic, amenity=bar/pub/cafe/restaurant
             // building=cathedral/chapel/church, craft=?, geological=?, mountain_pass=yes,
             // man_made=adit/lighthouse/pier/watermill/water_well/windmill
@@ -550,7 +557,7 @@ object TestRunner extends App
                 
                 if ( weight != 0.0 )
                 {
-                    if ( w.entityType.closed && w.entityType != EntityType.waterway )
+                    if ( w.entityType.closed && w.entityType != EntityType.waterway && coords.length > 3 )
                     {
                         val ring = geometryFactory.createLinearRing( (coords ++ List( coords.head )).toArray )
                         val holes : Array[LinearRing] = null
@@ -558,7 +565,7 @@ object TestRunner extends App
                         val feature = SimpleFeatureBuilder.build(GISTypes.shape, Array[java.lang.Object](polygon, new java.lang.Float(weight)), null)
                         featureCollection.add( feature )
                     }
-                    else
+                    else if ( coords.length > 1 )
                     {   
                         val line = geometryFactory.createLineString( coords.toArray )
                         val feature = SimpleFeatureBuilder.build(GISTypes.line, Array[java.lang.Object](line, new java.lang.Float(weight)), null)
@@ -621,7 +628,7 @@ object TestRunner extends App
             }
             </ogr:FeatureCollection>
         
-        scala.xml.XML.save("output.gml", gml)
+        scala.xml.XML.save("output.gml", gml, "utf-8")
         
         {
             import javax.media.jai.{KernelJAI}
@@ -654,16 +661,12 @@ object TestRunner extends App
             
             import org.geotools.gce.geotiff.GeoTiffFormat
             
-            //val envelope = new Envelope2D(
-            //    new DirectPosition2D( DefaultGeographicCRS.WGS84, b.lon1, b.lat1 ),
-            //    new DirectPosition2D( DefaultGeographicCRS.WGS84, b.lon2, b.lat2 ) )
             val envelope = featureCollection.getBounds()
                 
             
             import org.geotools.filter.{ConstantExpression, AttributeExpressionImpl}
             import org.geotools.process.raster.VectorToRasterProcess
-            
-            //val gridCoverage = VectorToRasterProcess.process( featureCollection, ConstantExpression.constant(20000.0), new java.awt.Dimension( 1000, 1000 ), envelope, "agrid", null )
+
             val gridCoverage = VectorToRasterProcess.process( featureCollection, new AttributeExpressionImpl("weight"), new java.awt.Dimension( 1000, 1000 ), envelope, "agrid", null )
             
 
@@ -689,7 +692,7 @@ object TestRunner extends App
             // Now step along each way, one by one sampling equally spaced points
             // using LengthIndexedLine (for both weight and SRTM rasters)
             val resultArray = Array.tabulate( 1000, 1000 )( (x, y) => 0.0f )
-            for ( w <- f.ways if w.entityType == EntityType.footpath || w.entityType == EntityType.cycleway )
+            for ( w <- f.ways if w.entityType == EntityType.footpath || w.entityType == EntityType.cycleway || w.entityType == EntityType.road )
             {
                 weightWay( w, convolved, resultArray )
             }
