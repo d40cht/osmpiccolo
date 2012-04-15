@@ -8,11 +8,22 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 import scala.io.Source
 import scala.xml.pull.{XMLEventReader, EvElemStart, EvElemEnd, EvText}
 
+import org.geotools.referencing.CRS
+import org.geotools.geometry.{DirectPosition2D}
+
 // Longitude W-E
 class OSMReader( val fileName : String, bounds : Bounds )
 {           
     var nodes = mutable.HashMap[Long, Node]()
     val ways = mutable.ArrayBuffer[Way]()
+    
+    // 4326: WSG84, 3785: Gmap spherical mercator
+    val lonLatCRS = CRS.decode("EPSG:4326", false)
+    val ourCRS = CRS.decode("EPSG:3785", false)
+    val lenient = true
+    val transform = CRS.findMathTransform(lonLatCRS, ourCRS, lenient)
+    
+    //Geometry targetGeometry = JTS.transform( sourceGeometry, transform)
 
     {
         val fin = new FileInputStream( fileName )
@@ -38,7 +49,9 @@ class OSMReader( val fileName : String, bounds : Bounds )
                     
                     //if ( bounds.within( lat, lon ) )
                     {
-                        val nn = new Node( lat, lon )
+                        val pos = new DirectPosition2D( lat, lon )
+                        transform.transform( pos, pos )
+                        val nn = new Node( pos )
                         nodes += id -> nn
                         currTaggable = Some(nn)
                     }
@@ -143,7 +156,7 @@ object XMLUtils
                                             <gml:LinearRing>
                                                 <gml:coordinates>
                                                 {
-                                                    w.nodes.map( n => n.lon + "," + n.lat ).mkString(" ")
+                                                    w.nodes.map( n => n.pos.x + "," + n.pos.y ).mkString(" ")
                                                 }
                                                 </gml:coordinates>
                                             </gml:LinearRing>
@@ -155,7 +168,7 @@ object XMLUtils
                                     <gml:LineString>
                                         <gml:coordinates>
                                         {
-                                            w.nodes.map( n => n.lon + "," + n.lat ).mkString(" ")
+                                            w.nodes.map( n => n.pos.x + "," + n.pos.y ).mkString(" ")
                                         }
                                         </gml:coordinates>
                                     </gml:LineString>

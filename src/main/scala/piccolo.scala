@@ -46,8 +46,8 @@ class Canvas( val nodes : Iterable[Node], val ways : Iterable[Way], val routeGra
     {
         if ( !w.nodes.isEmpty )
         {
-            val xs = w.nodes.map( _.lon.toFloat ).toArray
-            val ys = w.nodes.map( -_.lat.toFloat ).toArray
+            val xs = w.nodes.map( _.pos.x.toFloat ).toArray
+            val ys = w.nodes.map( -_.pos.y.toFloat ).toArray
             
             val ctype = w.entityType
             val layer = if ( w.has("layer") ) w.keys("layer").filter( _ != '+' ).toInt
@@ -107,13 +107,13 @@ class Canvas( val nodes : Iterable[Node], val ways : Iterable[Way], val routeGra
     
     for ( node <- nodes.view.filter( !_.inWay ) )
     {
-        val circ = PPath.createEllipse( node.lon.toFloat, -node.lat.toFloat, 3.0f, 3.0f )
+        val circ = PPath.createEllipse( node.pos.x.toFloat, -node.pos.y.toFloat, 3.0f, 3.0f )
         canvas.getLayer().addChild(circ)
         
         if ( false && node.has("name") )
         {
             val label = new PText()
-            label.setBounds( node.lon.toFloat, -node.lat.toFloat, 0, 0 )
+            label.setBounds( node.pos.x.toFloat, -node.pos.y.toFloat, 0, 0 )
             label.setHorizontalAlignment( java.awt.Component.CENTER_ALIGNMENT )
             label.setConstrainHeightToTextHeight(true)
             label.setConstrainWidthToTextWidth(true)
@@ -130,7 +130,7 @@ class Canvas( val nodes : Iterable[Node], val ways : Iterable[Way], val routeGra
     
     for ( node <- routeGraph.nodes )
     {
-        val circ = PPath.createEllipse( node.lon.toFloat-3.0f, (-node.lat.toFloat)-3.0f, 6.0f, 6.0f )
+        val circ = PPath.createEllipse( node.pos.x.toFloat-3.0f, (-node.pos.y.toFloat)-3.0f, 6.0f, 6.0f )
         circ.setPaint( new java.awt.Color( 0.0f, 0.0f, 1.0f ) )
         canvas.getLayer().addChild(circ)
         
@@ -177,14 +177,10 @@ class RouteGraph( xf : OSMReader )
     {
         import scala.math._
 
-        val theta = n1.lon - n2.lon
-        var dist = sin(toRadians(n1.lat)) * sin(toRadians(n2.lat)) + cos(toRadians(n1.lat)) * cos(toRadians(n2.lat)) * cos(toRadians(theta))
-        dist = acos(dist)
-        dist = toDegrees(dist)
-        dist = dist * 60 * 1.1515
-        dist = dist * 1.609344
+        val dx = n1.pos.x - n2.pos.x
+        val dy = n1.pos.y - n2.pos.y
         
-        dist
+        sqrt( dx*dx + dy*dy )
     }
     
     def nodes =

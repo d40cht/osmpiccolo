@@ -48,7 +48,7 @@ class Taggable
     def has( k : String ) = keys.contains(k)
 }
 
-class Node( val lat : Double, val lon : Double ) extends Taggable
+class Node( val pos : DirectPosition2D ) extends Taggable
 {
     var wayMembership = 0
     def inWay = wayMembership > 0
@@ -69,9 +69,9 @@ class Bounds( val lon1 : Double, val lon2 : Double, val lat1 : Double, val lat2 
 
 object GISTypes
 {
-    // 4326 is WGS84
-    val line = DataUtilities.createType("line", "centerline:LineString:srid=4326,weight:Float" )
-    val shape = DataUtilities.createType("shape", "geom:Polygon:srid=4326,weight:Float" )
+    // 4326 is WGS84, 3785 is Google spherical mercator
+    val line = DataUtilities.createType("line", "centerline:LineString:srid=3785,weight:Float" )
+    val shape = DataUtilities.createType("shape", "geom:Polygon:srid=3785,weight:Float" )
     //val highway = DataUtilities.createType("shape", "centerline:LineString,name:String" )
 }
 
@@ -92,7 +92,7 @@ object TestRunner extends App
         val gridGeom = heatMap.getGridGeometry()
         for ( (n, i) <- way.nodes.zipWithIndex )
         {
-            val currCoord = new Coordinate( n.lon, n.lat )
+            val currCoord = new Coordinate( n.pos.x, n.pos.y )
             currPoints.append( currCoord )
             
             val isRouteNode = n.wayMembership > 1 || i==lastIndex
@@ -118,7 +118,9 @@ object TestRunner extends App
                             val gridPos = gridGeom.worldToGrid(dp)
                             resultArray(gridPos.y)(gridPos.x) += res(0)
                         }
-                        index += 0.0002
+                        
+                        // Increment of 50m
+                        index += 50.0f
                     }
                 }
                 
@@ -136,7 +138,7 @@ object TestRunner extends App
         val b = new Bounds( -1.3743, -1.216, 51.735, 51.82 )
         val f = new OSMReader( args(0), b )
         
-        
+        XMLUtils.saveToGML( "output.gml", f )
         import org.geotools.feature.{FeatureCollections}
         val featureCollection = FeatureCollections.newCollection("lines")
         
@@ -161,7 +163,7 @@ object TestRunner extends App
             // route=?, tourism=?, waterway=?(not ditch/drain)
             for ( w <- f.ways )
             {
-                val coords = w.nodes.view.map( n => new Coordinate( n.lon, n.lat ) ).toList
+                val coords = w.nodes.view.map( n => new Coordinate( n.pos.x, n.pos.y ) ).toList
                 
                 val weight = w.entityType match
                 {
