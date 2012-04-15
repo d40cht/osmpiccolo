@@ -316,7 +316,7 @@ object TestRunner extends App
         private def wayType( w : Way ) =
         {
             // leisure:nature_reserve, tourism:viewpoint, natural:cliff, natural:cave_entrance,
-            // natural:peak, waterway:waterfall, leisure:pitch
+            // natural:peak, waterway:waterfall, leisure:pitch, barrier:kissing_gate
             // oneway:yes
             val wood = w.has( "natural", "wood" ) || w.has( "landuse", "forest" )
             val highway = w.has( "highway" )
