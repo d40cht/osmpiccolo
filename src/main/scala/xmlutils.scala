@@ -17,9 +17,10 @@ class OSMReader( val fileName : String, bounds : Bounds )
     var nodes = mutable.HashMap[Long, Node]()
     val ways = mutable.ArrayBuffer[Way]()
     
-    // 4326: WSG84, 3785: Gmap spherical mercator
+    // Some info here: http://alastaira.wordpress.com/2011/01/23/the-google-maps-bing-maps-spherical-mercator-projection/
+    // 4326: WSG84, 3857: Gmap spherical mercator
     val lonLatCRS = CRS.decode("EPSG:4326", false)
-    val ourCRS = CRS.decode("EPSG:3785", false)
+    val ourCRS = CRS.decode("EPSG:3857", false)
     val lenient = true
     val transform = CRS.findMathTransform(lonLatCRS, ourCRS, lenient)
     

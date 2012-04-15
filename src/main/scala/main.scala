@@ -69,9 +69,9 @@ class Bounds( val lon1 : Double, val lon2 : Double, val lat1 : Double, val lat2 
 
 object GISTypes
 {
-    // 4326 is WGS84, 3785 is Google spherical mercator
-    val line = DataUtilities.createType("line", "centerline:LineString:srid=3785,weight:Float" )
-    val shape = DataUtilities.createType("shape", "geom:Polygon:srid=3785,weight:Float" )
+    // 4326 is WGS84, 3857 is Google spherical mercator
+    val line = DataUtilities.createType("line", "centerline:LineString:srid=3857,weight:Float" )
+    val shape = DataUtilities.createType("shape", "geom:Polygon:srid=3857,weight:Float" )
     //val highway = DataUtilities.createType("shape", "centerline:LineString,name:String" )
 }
 

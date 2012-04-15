@@ -4,111 +4,116 @@
     <mapcanvas>
         <units>meters</units>
         <extent>
-            <xmin>-197153.680837</xmin>
-            <ymin>6702770.439554</ymin>
-            <xmax>-112206.941970</xmax>
-            <ymax>6754802.244214</ymax>
+            <xmin>-166595.078641</xmin>
+            <ymin>6765864.106265</ymin>
+            <xmax>-145303.548030</xmax>
+            <ymax>6778905.651784</ymax>
         </extent>
         <projections>1</projections>
         <destinationsrs>
             <spatialrefsys>
                 <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
-                <srsid>1743</srsid>
-                <srid>3785</srid>
-                <authid>EPSG:3785</authid>
-                <description>Popular Visualisation CRS / Mercator</description>
+                <srsid>3857</srsid>
+                <srid>3857</srid>
+                <authid>EPSG:3857</authid>
+                <description>WGS 84 / Pseudo Mercator</description>
                 <projectionacronym>merc</projectionacronym>
-                <ellipsoidacronym></ellipsoidacronym>
+                <ellipsoidacronym>WGS84</ellipsoidacronym>
                 <geographicflag>false</geographicflag>
             </spatialrefsys>
         </destinationsrs>
     </mapcanvas>
     <legend>
+        <legendlayer open="true" checked="Qt::Unchecked" name="Kirche/Friedhof/Kirchengelaende/Airport/Bahn/Bahnhof/Grossstadt/Stadt/Dorf/Weiler/Stadtteil/Ortschaft/Autobahn/Kraftfahrstrasse/Bundesstrasse/Landstrasse/einfache_Strasse/Zufahrtswege/Wohnstrasse/Wege/Radweg/Fussgaengerweg/Strand/Kueste/Inselpunkte/Insel/Wasserbecken/Kanal/Baeche/Fluesse/Wasser/Gebaeude/Wiese/Wald/Naherholungsgebiet/Park/Fussgaengerzone/unkultiviertes_Land/Gruenflaeche/Bauland/Industriegebiet/Landwirtschaft" showFeatureCount="0">
+            <filegroup open="true" hidden="false">
+                <legendlayerfile isInOverview="0" layerid="Kirche_Friedhof_Kirchengelaende_Airport_Bahn_Bahnhof_Grossstadt_Stadt_Dorf_Weiler_Stadtteil_Ortschaft_Autobahn_Kraftfahrstrasse_Bundesstrasse_Landstrasse_einfache_Strasse_Zufahrtswege_Wohnstrasse_Wege_Radweg_Fussgaengerweg_Strand_Kueste_Inselpunkte_Insel_Wasserbecken_Kanal_Baeche_Fluesse_Wasser_Gebaeude_Wiese_Wald_Naherholungsgebiet_Park_Fussgaengerzone_unkultiviertes_Land_Gruenflaeche_Bauland_Industriegebiet_Landwirtschaft20120415234428018" visible="0"/>
+            </filegroup>
+        </legendlayer>
         <legendlayer open="true" checked="Qt::Unchecked" name="Unknown" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Unknown20120415230701051" visible="0"/>
+                <legendlayerfile isInOverview="0" layerid="Unknown20120415233950892" visible="0"/>
             </filegroup>
         </legendlayer>
         <legendlayer open="true" checked="Qt::Unchecked" name="Railway" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Railway20120415230657114" visible="0"/>
-            </filegroup>
-        </legendlayer>
-        <legendlayer open="true" checked="Qt::Unchecked" name="Waterway" showFeatureCount="0">
-            <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Waterway20120415230653682" visible="0"/>
+                <legendlayerfile isInOverview="0" layerid="Railway20120415233944197" visible="0"/>
             </filegroup>
         </legendlayer>
         <legendlayer open="true" checked="Qt::Checked" name="Cycleway" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Cycleway20120415230650102" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="Cycleway20120415233930988" visible="1"/>
             </filegroup>
         </legendlayer>
         <legendlayer open="true" checked="Qt::Checked" name="Footpath" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Footpath20120415230645828" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="Footpath20120415233924313" visible="1"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Checked" name="Highway" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Unchecked" name="Highway" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Highway20120415230640321" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="Highway20120415233917769" visible="0"/>
             </filegroup>
         </legendlayer>
         <legendlayer open="true" checked="Qt::Checked" name="Road" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Road20120415230634478" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="Road20120415233909079" visible="1"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Checked" name="test2" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Unchecked" name="Waterway" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="test220120415230241568" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="Waterway20120415233937425" visible="0"/>
             </filegroup>
         </legendlayer>
         <legendlayer open="true" checked="Qt::Unchecked" name="Farmland" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Farmland20120415230716290" visible="0"/>
+                <legendlayerfile isInOverview="0" layerid="Farmland20120415234021169" visible="0"/>
             </filegroup>
         </legendlayer>
         <legendlayer open="true" checked="Qt::Unchecked" name="Greenspace" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Greenspace20120415230704655" visible="0"/>
+                <legendlayerfile isInOverview="0" layerid="Greenspace20120415233957441" visible="0"/>
             </filegroup>
         </legendlayer>
         <legendlayer open="true" checked="Qt::Unchecked" name="Woodland" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Woodland20120415230712611" visible="0"/>
+                <legendlayerfile isInOverview="0" layerid="Woodland20120415234014416" visible="0"/>
             </filegroup>
         </legendlayer>
         <legendlayer open="true" checked="Qt::Unchecked" name="Building" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Building20120415230708252" visible="0"/>
+                <legendlayerfile isInOverview="0" layerid="Building20120415234007267" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Checked" name="test" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Checked" name="test2" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="test20120415231551278" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="test220120415233719373" visible="1"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Unchecked" name="N51W002" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Checked" name="N51W002" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="N51W00220120415230115066" visible="0"/>
+                <legendlayerfile isInOverview="0" layerid="N51W00220120415233819804" visible="1"/>
+            </filegroup>
+        </legendlayer>
+        <legendlayer open="true" checked="Qt::Unchecked" name="test" showFeatureCount="0">
+            <filegroup open="true" hidden="false">
+                <legendlayerfile isInOverview="0" layerid="test20120415233702633" visible="0"/>
             </filegroup>
         </legendlayer>
     </legend>
-    <projectlayers layercount="14">
+    <projectlayers layercount="15">
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Polygon" type="vector" hasScaleBasedVisibilityFlag="0">
-            <id>Building20120415230708252</id>
+            <id>Building20120415234007267</id>
             <datasource>./output.gml|layername=Building</datasource>
             <layername>Building</layername>
             <srs>
                 <spatialrefsys>
                     <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
-                    <srsid>1743</srsid>
-                    <srid>3785</srid>
-                    <authid>EPSG:3785</authid>
-                    <description>Popular Visualisation CRS / Mercator</description>
+                    <srsid>3857</srsid>
+                    <srid>3857</srid>
+                    <authid>EPSG:3857</authid>
+                    <description>WGS 84 / Pseudo Mercator</description>
                     <projectionacronym>merc</projectionacronym>
-                    <ellipsoidacronym></ellipsoidacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
                     <geographicflag>false</geographicflag>
                 </spatialrefsys>
             </srs>
@@ -119,7 +124,7 @@
                 <symbols>
                     <symbol outputUnit="MM" alpha="1" type="fill" name="0">
                         <layer pass="0" class="SimpleFill" locked="0">
-                            <prop k="color" v="212,212,212,255"/>
+                            <prop k="color" v="198,198,198,255"/>
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="offset" v="0,0"/>
                             <prop k="style" v="solid"/>
@@ -164,18 +169,18 @@
             <attributeactions/>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Line" type="vector" hasScaleBasedVisibilityFlag="0">
-            <id>Cycleway20120415230650102</id>
+            <id>Cycleway20120415233930988</id>
             <datasource>./output.gml|layername=Cycleway</datasource>
             <layername>Cycleway</layername>
             <srs>
                 <spatialrefsys>
                     <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
-                    <srsid>1743</srsid>
-                    <srid>3785</srid>
-                    <authid>EPSG:3785</authid>
-                    <description>Popular Visualisation CRS / Mercator</description>
+                    <srsid>3857</srsid>
+                    <srid>3857</srid>
+                    <authid>EPSG:3857</authid>
+                    <description>WGS 84 / Pseudo Mercator</description>
                     <projectionacronym>merc</projectionacronym>
-                    <ellipsoidacronym></ellipsoidacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
                     <geographicflag>false</geographicflag>
                 </spatialrefsys>
             </srs>
@@ -187,7 +192,7 @@
                     <symbol outputUnit="MM" alpha="1" type="line" name="0">
                         <layer pass="0" class="SimpleLine" locked="0">
                             <prop k="capstyle" v="square"/>
-                            <prop k="color" v="253,116,180,255"/>
+                            <prop k="color" v="204,202,85,255"/>
                             <prop k="customdash" v="5;2"/>
                             <prop k="joinstyle" v="bevel"/>
                             <prop k="offset" v="0"/>
@@ -229,18 +234,18 @@
             <attributeactions/>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Polygon" type="vector" hasScaleBasedVisibilityFlag="0">
-            <id>Farmland20120415230716290</id>
+            <id>Farmland20120415234021169</id>
             <datasource>./output.gml|layername=Farmland</datasource>
             <layername>Farmland</layername>
             <srs>
                 <spatialrefsys>
                     <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
-                    <srsid>1743</srsid>
-                    <srid>3785</srid>
-                    <authid>EPSG:3785</authid>
-                    <description>Popular Visualisation CRS / Mercator</description>
+                    <srsid>3857</srsid>
+                    <srid>3857</srid>
+                    <authid>EPSG:3857</authid>
+                    <description>WGS 84 / Pseudo Mercator</description>
                     <projectionacronym>merc</projectionacronym>
-                    <ellipsoidacronym></ellipsoidacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
                     <geographicflag>false</geographicflag>
                 </spatialrefsys>
             </srs>
@@ -251,7 +256,7 @@
                 <symbols>
                     <symbol outputUnit="MM" alpha="1" type="fill" name="0">
                         <layer pass="0" class="SimpleFill" locked="0">
-                            <prop k="color" v="124,62,0,255"/>
+                            <prop k="color" v="170,85,0,255"/>
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="offset" v="0,0"/>
                             <prop k="style" v="solid"/>
@@ -296,18 +301,18 @@
             <attributeactions/>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Line" type="vector" hasScaleBasedVisibilityFlag="0">
-            <id>Footpath20120415230645828</id>
+            <id>Footpath20120415233924313</id>
             <datasource>./output.gml|layername=Footpath</datasource>
             <layername>Footpath</layername>
             <srs>
                 <spatialrefsys>
                     <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
-                    <srsid>1743</srsid>
-                    <srid>3785</srid>
-                    <authid>EPSG:3785</authid>
-                    <description>Popular Visualisation CRS / Mercator</description>
+                    <srsid>3857</srsid>
+                    <srid>3857</srid>
+                    <authid>EPSG:3857</authid>
+                    <description>WGS 84 / Pseudo Mercator</description>
                     <projectionacronym>merc</projectionacronym>
-                    <ellipsoidacronym></ellipsoidacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
                     <geographicflag>false</geographicflag>
                 </spatialrefsys>
             </srs>
@@ -319,7 +324,7 @@
                     <symbol outputUnit="MM" alpha="1" type="line" name="0">
                         <layer pass="0" class="SimpleLine" locked="0">
                             <prop k="capstyle" v="square"/>
-                            <prop k="color" v="8,200,127,255"/>
+                            <prop k="color" v="96,144,152,255"/>
                             <prop k="customdash" v="5;2"/>
                             <prop k="joinstyle" v="bevel"/>
                             <prop k="offset" v="0"/>
@@ -361,18 +366,18 @@
             <attributeactions/>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Polygon" type="vector" hasScaleBasedVisibilityFlag="0">
-            <id>Greenspace20120415230704655</id>
+            <id>Greenspace20120415233957441</id>
             <datasource>./output.gml|layername=Greenspace</datasource>
             <layername>Greenspace</layername>
             <srs>
                 <spatialrefsys>
                     <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
-                    <srsid>1743</srsid>
-                    <srid>3785</srid>
-                    <authid>EPSG:3785</authid>
-                    <description>Popular Visualisation CRS / Mercator</description>
+                    <srsid>3857</srsid>
+                    <srid>3857</srid>
+                    <authid>EPSG:3857</authid>
+                    <description>WGS 84 / Pseudo Mercator</description>
                     <projectionacronym>merc</projectionacronym>
-                    <ellipsoidacronym></ellipsoidacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
                     <geographicflag>false</geographicflag>
                 </spatialrefsys>
             </srs>
@@ -428,18 +433,18 @@
             <attributeactions/>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Line" type="vector" hasScaleBasedVisibilityFlag="0">
-            <id>Highway20120415230640321</id>
+            <id>Highway20120415233917769</id>
             <datasource>./output.gml|layername=Highway</datasource>
             <layername>Highway</layername>
             <srs>
                 <spatialrefsys>
                     <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
-                    <srsid>1743</srsid>
-                    <srid>3785</srid>
-                    <authid>EPSG:3785</authid>
-                    <description>Popular Visualisation CRS / Mercator</description>
+                    <srsid>3857</srsid>
+                    <srid>3857</srid>
+                    <authid>EPSG:3857</authid>
+                    <description>WGS 84 / Pseudo Mercator</description>
                     <projectionacronym>merc</projectionacronym>
-                    <ellipsoidacronym></ellipsoidacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
                     <geographicflag>false</geographicflag>
                 </spatialrefsys>
             </srs>
@@ -451,7 +456,7 @@
                     <symbol outputUnit="MM" alpha="1" type="line" name="0">
                         <layer pass="0" class="SimpleLine" locked="0">
                             <prop k="capstyle" v="square"/>
-                            <prop k="color" v="34,39,201,255"/>
+                            <prop k="color" v="72,173,216,255"/>
                             <prop k="customdash" v="5;2"/>
                             <prop k="joinstyle" v="bevel"/>
                             <prop k="offset" v="0"/>
@@ -493,7 +498,218 @@
             <attributeactions/>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
-            <id>N51W00220120415230115066</id>
+            <id>Kirche_Friedhof_Kirchengelaende_Airport_Bahn_Bahnhof_Grossstadt_Stadt_Dorf_Weiler_Stadtteil_Ortschaft_Autobahn_Kraftfahrstrasse_Bundesstrasse_Landstrasse_einfache_Strasse_Zufahrtswege_Wohnstrasse_Wege_Radweg_Fussgaengerweg_Strand_Kueste_Inselpunkte_Insel_Wasserbecken_Kanal_Baeche_Fluesse_Wasser_Gebaeude_Wiese_Wald_Naherholungsgebiet_Park_Fussgaengerzone_unkultiviertes_Land_Gruenflaeche_Bauland_Industriegebiet_Landwirtschaft20120415234428018</id>
+            <datasource>http://mapbender.wheregroup.com/cgi-bin/mapserv?map=/data/umn/osm/osm_basic.map&amp;VERSION=1.1.1</datasource>
+            <layername>Kirche/Friedhof/Kirchengelaende/Airport/Bahn/Bahnhof/Grossstadt/Stadt/Dorf/Weiler/Stadtteil/Ortschaft/Autobahn/Kraftfahrstrasse/Bundesstrasse/Landstrasse/einfache_Strasse/Zufahrtswege/Wohnstrasse/Wege/Radweg/Fussgaengerweg/Strand/Kueste/Inselpunkte/Insel/Wasserbecken/Kanal/Baeche/Fluesse/Wasser/Gebaeude/Wiese/Wald/Naherholungsgebiet/Park/Fussgaengerzone/unkultiviertes_Land/Gruenflaeche/Bauland/Industriegebiet/Landwirtschaft</layername>
+            <srs>
+                <spatialrefsys>
+                    <proj4>+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs</proj4>
+                    <srsid>3452</srsid>
+                    <srid>4326</srid>
+                    <authid>EPSG:4326</authid>
+                    <description>WGS 84</description>
+                    <projectionacronym>longlat</projectionacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
+                    <geographicflag>true</geographicflag>
+                </spatialrefsys>
+            </srs>
+            <transparencyLevelInt>255</transparencyLevelInt>
+            <customproperties/>
+            <provider>wms</provider>
+            <rasterproperties>
+                <wmsSublayer>
+                    <name>Kirche</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Friedhof</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Kirchengelaende</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Airport</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Bahn</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Bahnhof</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Grossstadt</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Stadt</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Dorf</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Weiler</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Stadtteil</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Ortschaft</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Autobahn</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Kraftfahrstrasse</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Bundesstrasse</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Landstrasse</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>einfache_Strasse</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Zufahrtswege</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Wohnstrasse</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Wege</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Radweg</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Fussgaengerweg</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Strand</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Kueste</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Inselpunkte</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Insel</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Wasserbecken</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Kanal</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Baeche</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Fluesse</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Wasser</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Gebaeude</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Wiese</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Wald</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Naherholungsgebiet</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Park</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Fussgaengerzone</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>unkultiviertes_Land</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Gruenflaeche</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Bauland</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Industriegebiet</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsSublayer>
+                    <name>Landwirtschaft</name>
+                    <style></style>
+                </wmsSublayer>
+                <wmsFormat>image/png</wmsFormat>
+                <mDrawingStyle>SingleBandColorDataStyle</mDrawingStyle>
+                <mColorShadingAlgorithm>UndefinedShader</mColorShadingAlgorithm>
+                <mInvertColor boolean="false"/>
+                <mRedBandName></mRedBandName>
+                <mGreenBandName></mGreenBandName>
+                <mBlueBandName></mBlueBandName>
+                <mGrayBandName>Band 1</mGrayBandName>
+                <mStandardDeviations>0</mStandardDeviations>
+                <mUserDefinedRGBMinimumMaximum boolean="false"/>
+                <mRGBMinimumMaximumEstimated boolean="true"/>
+                <mUserDefinedGrayMinimumMaximum boolean="false"/>
+                <mGrayMinimumMaximumEstimated boolean="true"/>
+                <mContrastEnhancementAlgorithm>NoEnhancement</mContrastEnhancementAlgorithm>
+                <contrastEnhancementMinMaxValues>
+                    <minMaxEntry>
+                        <min>-1.79769e+308</min>
+                        <max>1.79769e+308</max>
+                    </minMaxEntry>
+                </contrastEnhancementMinMaxValues>
+                <mNoDataValue mValidNoDataValue="false">0.000000</mNoDataValue>
+            </rasterproperties>
+        </maplayer>
+        <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
+            <id>N51W00220120415233819804</id>
             <datasource>./data/N51W002.hgt</datasource>
             <layername>N51W002</layername>
             <srs>
@@ -541,18 +757,18 @@
             </rasterproperties>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Line" type="vector" hasScaleBasedVisibilityFlag="0">
-            <id>Railway20120415230657114</id>
+            <id>Railway20120415233944197</id>
             <datasource>./output.gml|layername=Railway</datasource>
             <layername>Railway</layername>
             <srs>
                 <spatialrefsys>
                     <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
-                    <srsid>1743</srsid>
-                    <srid>3785</srid>
-                    <authid>EPSG:3785</authid>
-                    <description>Popular Visualisation CRS / Mercator</description>
+                    <srsid>3857</srsid>
+                    <srid>3857</srid>
+                    <authid>EPSG:3857</authid>
+                    <description>WGS 84 / Pseudo Mercator</description>
                     <projectionacronym>merc</projectionacronym>
-                    <ellipsoidacronym></ellipsoidacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
                     <geographicflag>false</geographicflag>
                 </spatialrefsys>
             </srs>
@@ -564,7 +780,7 @@
                     <symbol outputUnit="MM" alpha="1" type="line" name="0">
                         <layer pass="0" class="SimpleLine" locked="0">
                             <prop k="capstyle" v="square"/>
-                            <prop k="color" v="62,123,128,255"/>
+                            <prop k="color" v="238,165,243,255"/>
                             <prop k="customdash" v="5;2"/>
                             <prop k="joinstyle" v="bevel"/>
                             <prop k="offset" v="0"/>
@@ -606,18 +822,18 @@
             <attributeactions/>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Line" type="vector" hasScaleBasedVisibilityFlag="0">
-            <id>Road20120415230634478</id>
+            <id>Road20120415233909079</id>
             <datasource>./output.gml|layername=Road</datasource>
             <layername>Road</layername>
             <srs>
                 <spatialrefsys>
                     <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
-                    <srsid>1743</srsid>
-                    <srid>3785</srid>
-                    <authid>EPSG:3785</authid>
-                    <description>Popular Visualisation CRS / Mercator</description>
+                    <srsid>3857</srsid>
+                    <srid>3857</srid>
+                    <authid>EPSG:3857</authid>
+                    <description>WGS 84 / Pseudo Mercator</description>
                     <projectionacronym>merc</projectionacronym>
-                    <ellipsoidacronym></ellipsoidacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
                     <geographicflag>false</geographicflag>
                 </spatialrefsys>
             </srs>
@@ -629,7 +845,7 @@
                     <symbol outputUnit="MM" alpha="1" type="line" name="0">
                         <layer pass="0" class="SimpleLine" locked="0">
                             <prop k="capstyle" v="square"/>
-                            <prop k="color" v="64,223,223,255"/>
+                            <prop k="color" v="13,148,103,255"/>
                             <prop k="customdash" v="5;2"/>
                             <prop k="joinstyle" v="bevel"/>
                             <prop k="offset" v="0"/>
@@ -671,18 +887,18 @@
             <attributeactions/>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Line" type="vector" hasScaleBasedVisibilityFlag="0">
-            <id>Unknown20120415230701051</id>
+            <id>Unknown20120415233950892</id>
             <datasource>./output.gml|layername=Unknown</datasource>
             <layername>Unknown</layername>
             <srs>
                 <spatialrefsys>
                     <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
-                    <srsid>1743</srsid>
-                    <srid>3785</srid>
-                    <authid>EPSG:3785</authid>
-                    <description>Popular Visualisation CRS / Mercator</description>
+                    <srsid>3857</srsid>
+                    <srid>3857</srid>
+                    <authid>EPSG:3857</authid>
+                    <description>WGS 84 / Pseudo Mercator</description>
                     <projectionacronym>merc</projectionacronym>
-                    <ellipsoidacronym></ellipsoidacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
                     <geographicflag>false</geographicflag>
                 </spatialrefsys>
             </srs>
@@ -694,7 +910,7 @@
                     <symbol outputUnit="MM" alpha="1" type="line" name="0">
                         <layer pass="0" class="SimpleLine" locked="0">
                             <prop k="capstyle" v="square"/>
-                            <prop k="color" v="59,114,181,255"/>
+                            <prop k="color" v="172,127,84,255"/>
                             <prop k="customdash" v="5;2"/>
                             <prop k="joinstyle" v="bevel"/>
                             <prop k="offset" v="0"/>
@@ -736,29 +952,29 @@
             <attributeactions/>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Polygon" type="vector" hasScaleBasedVisibilityFlag="0">
-            <id>Waterway20120415230653682</id>
+            <id>Waterway20120415233937425</id>
             <datasource>./output.gml|layername=Waterway</datasource>
             <layername>Waterway</layername>
             <srs>
                 <spatialrefsys>
                     <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
-                    <srsid>1743</srsid>
-                    <srid>3785</srid>
-                    <authid>EPSG:3785</authid>
-                    <description>Popular Visualisation CRS / Mercator</description>
+                    <srsid>3857</srsid>
+                    <srid>3857</srid>
+                    <authid>EPSG:3857</authid>
+                    <description>WGS 84 / Pseudo Mercator</description>
                     <projectionacronym>merc</projectionacronym>
-                    <ellipsoidacronym></ellipsoidacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
                     <geographicflag>false</geographicflag>
                 </spatialrefsys>
             </srs>
             <transparencyLevelInt>255</transparencyLevelInt>
-            <provider encoding="System">ogr</provider>
+            <provider encoding="UTF-8">ogr</provider>
             <vectorjoins/>
             <renderer-v2 symbollevels="0" type="singleSymbol">
                 <symbols>
                     <symbol outputUnit="MM" alpha="1" type="fill" name="0">
                         <layer pass="0" class="SimpleFill" locked="0">
-                            <prop k="color" v="38,27,255,255"/>
+                            <prop k="color" v="0,85,255,255"/>
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="offset" v="0,0"/>
                             <prop k="style" v="solid"/>
@@ -771,7 +987,7 @@
                 <sizescale field=""/>
             </renderer-v2>
             <customproperties/>
-            <displayfield></displayfield>
+            <displayfield>name</displayfield>
             <label>0</label>
             <labelattributes>
                 <label fieldname="" text="Label"/>
@@ -793,24 +1009,28 @@
                 <multilineenabled fieldname="" on=""/>
                 <selectedonly on=""/>
             </labelattributes>
+            <edittypes>
+                <edittype type="0" name="cat"/>
+                <edittype type="0" name="name"/>
+            </edittypes>
             <editform></editform>
             <editforminit></editforminit>
             <annotationform></annotationform>
             <attributeactions/>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Polygon" type="vector" hasScaleBasedVisibilityFlag="0">
-            <id>Woodland20120415230712611</id>
+            <id>Woodland20120415234014416</id>
             <datasource>./output.gml|layername=Woodland</datasource>
             <layername>Woodland</layername>
             <srs>
                 <spatialrefsys>
                     <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
-                    <srsid>1743</srsid>
-                    <srid>3785</srid>
-                    <authid>EPSG:3785</authid>
-                    <description>Popular Visualisation CRS / Mercator</description>
+                    <srsid>3857</srsid>
+                    <srid>3857</srid>
+                    <authid>EPSG:3857</authid>
+                    <description>WGS 84 / Pseudo Mercator</description>
                     <projectionacronym>merc</projectionacronym>
-                    <ellipsoidacronym></ellipsoidacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
                     <geographicflag>false</geographicflag>
                 </spatialrefsys>
             </srs>
@@ -866,27 +1086,27 @@
             <attributeactions/>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
-            <id>test20120415231551278</id>
+            <id>test20120415233702633</id>
             <datasource>./test.tiff</datasource>
             <layername>test</layername>
             <srs>
                 <spatialrefsys>
                     <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
-                    <srsid>1743</srsid>
-                    <srid>3785</srid>
-                    <authid>EPSG:3785</authid>
-                    <description>Popular Visualisation CRS / Mercator</description>
+                    <srsid>3857</srsid>
+                    <srid>3857</srid>
+                    <authid>EPSG:3857</authid>
+                    <description>WGS 84 / Pseudo Mercator</description>
                     <projectionacronym>merc</projectionacronym>
-                    <ellipsoidacronym></ellipsoidacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
                     <geographicflag>false</geographicflag>
                 </spatialrefsys>
             </srs>
-            <transparencyLevelInt>115</transparencyLevelInt>
+            <transparencyLevelInt>255</transparencyLevelInt>
             <customproperties/>
             <provider>gdal</provider>
             <rasterproperties>
                 <mDrawingStyle>SingleBandPseudoColor</mDrawingStyle>
-                <mColorShadingAlgorithm>PseudoColorShader</mColorShadingAlgorithm>
+                <mColorShadingAlgorithm>FreakOutShader</mColorShadingAlgorithm>
                 <mInvertColor boolean="false"/>
                 <mRedBandName>Not Set</mRedBandName>
                 <mGreenBandName>Not Set</mGreenBandName>
@@ -914,18 +1134,18 @@
             </rasterproperties>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
-            <id>test220120415230241568</id>
+            <id>test220120415233719373</id>
             <datasource>./test2.tiff</datasource>
             <layername>test2</layername>
             <srs>
                 <spatialrefsys>
                     <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
-                    <srsid>1743</srsid>
-                    <srid>3785</srid>
-                    <authid>EPSG:3785</authid>
-                    <description>Popular Visualisation CRS / Mercator</description>
+                    <srsid>3857</srsid>
+                    <srid>3857</srid>
+                    <authid>EPSG:3857</authid>
+                    <description>WGS 84 / Pseudo Mercator</description>
                     <projectionacronym>merc</projectionacronym>
-                    <ellipsoidacronym></ellipsoidacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
                     <geographicflag>false</geographicflag>
                 </spatialrefsys>
             </srs>
@@ -972,7 +1192,7 @@
         <SpatialRefSys>
             <ProjectCRSProj4String type="QString">+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs</ProjectCRSProj4String>
             <ProjectCrs type="QString">EPSG:4326</ProjectCrs>
-            <ProjectCRSID type="int">1743</ProjectCRSID>
+            <ProjectCRSID type="int">3857</ProjectCRSID>
             <ProjectionsEnabled type="int">1</ProjectionsEnabled>
         </SpatialRefSys>
         <Paths>
