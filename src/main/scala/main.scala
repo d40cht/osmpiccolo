@@ -168,7 +168,7 @@ object TestRunner extends App
                 val weight = w.entityType match
                 {
                     case EntityType.highway    => -100000.0
-                    case EntityType.building   => -2000.0
+                    case EntityType.building   => -5000.0
                     case EntityType.woodland   => 5000.0
                     case EntityType.waterway   => 50000.0
                     case EntityType.greenspace => 3000.0
