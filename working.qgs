@@ -4,10 +4,10 @@
     <mapcanvas>
         <units>meters</units>
         <extent>
-            <xmin>-170246.711386</xmin>
-            <ymin>6755711.021568</ymin>
-            <xmax>-127663.650164</xmax>
-            <ymax>6781794.112607</ymax>
+            <xmin>-149013.143200</xmin>
+            <ymin>6756005.663893</ymin>
+            <xmax>-138367.377894</xmax>
+            <ymax>6762526.436652</ymax>
         </extent>
         <projections>1</projections>
         <destinationsrs>
@@ -74,9 +74,9 @@
                 <legendlayerfile isInOverview="0" layerid="Greenspace20120415233957441" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Unchecked" name="Woodland" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Checked" name="Woodland" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Woodland20120415234014416" visible="0"/>
+                <legendlayerfile isInOverview="0" layerid="Woodland20120415234014416" visible="1"/>
             </filegroup>
         </legendlayer>
         <legendlayer open="true" checked="Qt::Unchecked" name="Building" showFeatureCount="0">
@@ -84,19 +84,19 @@
                 <legendlayerfile isInOverview="0" layerid="Building20120415234007267" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Checked" name="test2" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Unchecked" name="test2" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="test220120415233719373" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="test220120415233719373" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Checked" name="N51W002" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Unchecked" name="N51W002" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="N51W00220120415233819804" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="N51W00220120415233819804" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Unchecked" name="test" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Checked" name="test" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="test20120415233702633" visible="0"/>
+                <legendlayerfile isInOverview="0" layerid="test20120415233702633" visible="1"/>
             </filegroup>
         </legendlayer>
     </legend>
@@ -706,6 +706,12 @@
                     </minMaxEntry>
                 </contrastEnhancementMinMaxValues>
                 <mNoDataValue mValidNoDataValue="false">0.000000</mNoDataValue>
+                <singleValuePixelList>
+                    <pixelListEntry pixelValue="0.000000" percentTransparent="100"/>
+                </singleValuePixelList>
+                <threeValuePixelList>
+                    <pixelListEntry red="0.000000" blue="0.000000" green="0.000000" percentTransparent="100"/>
+                </threeValuePixelList>
             </rasterproperties>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">

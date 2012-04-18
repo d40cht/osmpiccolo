@@ -4,12 +4,13 @@ import scala.util.Random.{nextInt, nextFloat}
 import scala.collection.{mutable, immutable}
 
 
-import org.geotools.coverage.grid.{GridCoverageFactory, GridCoverage2D}
+import org.geotools.coverage.grid.{GridCoverageFactory, GridCoverage2D, GridCoordinates2D}
 import org.opengis.referencing.crs._
 import org.geotools.referencing.crs._
 import org.geotools.geometry.{DirectPosition2D, Envelope2D}
 import org.geotools.data.{DataUtilities}
-
+import org.geotools.filter.{ConstantExpression, AttributeExpressionImpl}
+import org.geotools.process.raster.VectorToRasterProcess
 
 object EntityType extends Enumeration
 {
@@ -60,24 +61,51 @@ class Way() extends Taggable
 }
 
 
-class Bounds( val lon1 : Double, val lon2 : Double, val lat1 : Double, val lat2 : Double )
-{
-    assert( lon2 >= lon1 )
-    assert( lat2 >= lat1 )
-    def within( lat : Double, lon : Double ) = lon >= lon1 && lon <= lon2 && lat >= lat1 && lat <= lat2
-}
-
 object GISTypes
 {
     // 4326 is WGS84, 3857 is Google spherical mercator
-    val line = DataUtilities.createType("line", "centerline:LineString:srid=3857,weight:Float" )
-    val shape = DataUtilities.createType("shape", "geom:Polygon:srid=3857,weight:Float" )
-    //val highway = DataUtilities.createType("shape", "centerline:LineString,name:String" )
+    val line = DataUtilities.createType("line", "centerline:LineString:srid=3857" )
+    val shape = DataUtilities.createType("shape", "geom:Polygon:srid=3857" )
 }
+
+
+class GaussianMaxKernel( val radius : Int, val fn : (Int, Int) => Option[Double] )
+{
+    private val diam = (radius*2)-1
+    
+    // Gaussian quadrant. Not normalised as we'll be doing max
+    private val arr = Array.tabulate( diam, diam )( (x, y) =>
+    {
+        val cx = x-radius
+        val cy = y-radius
+        
+        val invrsq = 1.0F/((radius/2.0)*(radius/2.0))
+        val d = scala.math.sqrt((cx*cx).toDouble + (cy*cy).toDouble)
+        
+        scala.math.exp(-d*d*invrsq).toDouble
+    } )
+    
+    def apply( x : Int, y : Int ) =
+    {
+        var value = 0.0
+        for ( sx <- 0 until diam; sy <- 0 until diam )
+        {
+            val rx = sx-radius
+            val ry = sy-radius
+         
+            fn(x+rx, y+ry).foreach( pxval =>
+            {
+                value = (arr(sx)(sy) * pxval) max value
+            } )
+        }
+        value.toFloat
+    }
+}
+
 
 object TestRunner extends App
 {
-    def weightWay( way : Way, heatMap : GridCoverage2D, resultArray : Array[Array[Float]] )
+    def weightWay( envelope : Envelope2D, way : Way, worldToGrid : DirectPosition2D => (Int, Int), heatMap : Array[Array[Float]], resultArray : Array[Array[Float]] )
     {
         import org.geotools.geometry.{DirectPosition2D}
         import org.geotools.geometry.jts.{JTSFactoryFinder}
@@ -87,9 +115,7 @@ object TestRunner extends App
         val lastIndex = way.nodes.length-1
         var currPoints = mutable.ArrayBuffer[Coordinate]()
         
-        val envelope = heatMap.getEnvelope2D()
         val geometryFactory = JTSFactoryFinder.getGeometryFactory( null )
-        val gridGeom = heatMap.getGridGeometry()
         for ( (n, i) <- way.nodes.zipWithIndex )
         {
             val currCoord = new Coordinate( n.pos.x, n.pos.y )
@@ -111,12 +137,10 @@ object TestRunner extends App
                     {
                         val coords = lil.extractPoint(index)
                         val dp = new DirectPosition2D( coords.x, coords.y )
-                        val res = Array[Float](0.0f)
                         if ( envelope.contains(dp) )
                         {
-                            heatMap.evaluate(dp.asInstanceOf[java.awt.geom.Point2D], res)
-                            val gridPos = gridGeom.worldToGrid(dp)
-                            resultArray(gridPos.y)(gridPos.x) += res(0)
+                            val (x, y) = worldToGrid( dp )
+                            resultArray(y)(x) += heatMap(y)(x)
                         }
                         
                         // Increment of 50m
@@ -129,143 +153,125 @@ object TestRunner extends App
             }
         }
     }
-
-        
+    
+    // In rural areas with no forest/lakes/other big features labelled, upweight for
+    // things like cattle grids, stiles, bridleway, regional walking route
+    // archaeological
+    
+    // Additionally, for nodes/ways: key=historic, amenity=bar/pub/cafe/restaurant
+    // building=cathedral/chapel/church, craft=?, geological=?, mountain_pass=yes,
+    // man_made=adit/lighthouse/pier/watermill/water_well/windmill
+    // natural=?, railway=abandoned/disused/funicular
+    // route=?, tourism=?, waterway=?(not ditch/drain)        
     override def main( args : Array[String] ) =
     {
         // Oxford
-        //val b = new Bounds(-1.4558, -1.1949, 51.6554, 51.8916)
-        val b = new Bounds( -1.3743, -1.216, 51.735, 51.82 )
-        val f = new OSMReader( args(0), b )
+        val f = new OSMReader( args(0) )
         
         XMLUtils.saveToGML( "output.gml", f )
         import org.geotools.feature.{FeatureCollections}
-        val featureCollection = FeatureCollections.newCollection("lines")
         
+        // Radius is in grid cells (for now, metres would be better)
+        case class OfInterest( et : EntityType.Value, weight : Double, radius : Int )
+        
+        val ofInterest = List(
+            new OfInterest( EntityType.highway,     -2000.0f,  10 ),
+            new OfInterest( EntityType.building,    -1000.0f,  10 ),
+            new OfInterest( EntityType.woodland,    1000.0f,   10 ),
+            new OfInterest( EntityType.waterway,    1000.0f,   10 ),
+            new OfInterest( EntityType.greenspace,  1000.0f,   10 ),
+            new OfInterest( EntityType.farmland,    500.0f,    10 ) )
+
+        def rasterDims = (1000, 1000)
+        val envelope = f.bounds.envelope
+        
+        val cellWeights = Array.tabulate( rasterDims._1, rasterDims._2 )( (x, y) => 0.0f )
+        for ( current <- ofInterest )
         {
+            println( "Generating raster for %s".format(current.et) )
+            val featureCollection = FeatureCollections.newCollection("lines")
+        
             import org.geotools.geometry.jts.{JTSFactoryFinder}
             import com.vividsolutions.jts.geom.{GeometryFactory, LinearRing, Coordinate}
             import org.geotools.feature.simple.{SimpleFeatureBuilder}
-            
-            import org.geotools.{GML}
             import org.geotools.gml.producer.{FeatureTransformer}
                
+            // Build all the features for this entity type into the feature list
             val geometryFactory = JTSFactoryFinder.getGeometryFactory( null )
-            
-            // In rural areas with no forest/lakes/other big features labelled, upweight for
-            // things like cattle grids, stiles, bridleway, regional walking route
-            // archaeological
-            
-            // Additionally, for nodes/ways: key=historic, amenity=bar/pub/cafe/restaurant
-            // building=cathedral/chapel/church, craft=?, geological=?, mountain_pass=yes,
-            // man_made=adit/lighthouse/pier/watermill/water_well/windmill
-            // natural=?, railway=abandoned/disused/funicular
-            // route=?, tourism=?, waterway=?(not ditch/drain)
-            for ( w <- f.ways )
+            for ( w <- f.ways if w.entityType == current.et )
             {
                 val coords = w.nodes.view.map( n => new Coordinate( n.pos.x, n.pos.y ) ).toList
                 
-                val weight = w.entityType match
+                if ( w.entityType.closed && w.entityType != EntityType.waterway && coords.length > 3 )
                 {
-                    case EntityType.highway    => -100000.0
-                    case EntityType.building   => -5000.0
-                    case EntityType.woodland   => 5000.0
-                    case EntityType.waterway   => 50000.0
-                    case EntityType.greenspace => 3000.0
-                    case EntityType.farmland   => 2000.0
-                    case _ => 0.0
+                    val ring = geometryFactory.createLinearRing( (coords ++ List( coords.head )).toArray )
+                    val holes : Array[LinearRing] = null
+                    val polygon = geometryFactory.createPolygon( ring, holes )
+                    val feature = SimpleFeatureBuilder.build(GISTypes.shape, Array[java.lang.Object](polygon), null)
+                    featureCollection.add( feature )
                 }
-                
-                
-                if ( weight != 0.0 )
-                {
-                    if ( w.entityType.closed && w.entityType != EntityType.waterway && coords.length > 3 )
-                    {
-                        val ring = geometryFactory.createLinearRing( (coords ++ List( coords.head )).toArray )
-                        val holes : Array[LinearRing] = null
-                        val polygon = geometryFactory.createPolygon( ring, holes )
-                        val feature = SimpleFeatureBuilder.build(GISTypes.shape, Array[java.lang.Object](polygon, new java.lang.Float(weight)), null)
-                        featureCollection.add( feature )
-                    }
-                    else if ( coords.length > 1 )
-                    {   
-                        val line = geometryFactory.createLineString( coords.toArray )
-                        val feature = SimpleFeatureBuilder.build(GISTypes.line, Array[java.lang.Object](line, new java.lang.Float(weight)), null)
-                        featureCollection.add( feature )
-                    }
+                else if ( coords.length > 1 )
+                {   
+                    val line = geometryFactory.createLineString( coords.toArray )
+                    val feature = SimpleFeatureBuilder.build(GISTypes.line, Array[java.lang.Object](line), null)
+                    featureCollection.add( feature )
                 }
             }
-        }            
-        
-        {
-            import javax.media.jai.{KernelJAI}
+       
             
-            def makeGaussianKernel( radius : Int ) : KernelJAI = 
+            // Render the features directly onto a grid
+            val gridCoverage = VectorToRasterProcess.process( featureCollection, ConstantExpression.constant(current.weight), new java.awt.Dimension( rasterDims._1, rasterDims._2 ), envelope, "agrid", null )
+            
+            // Buffer the features out using max kernel and an appropriate radius into cellWeights
+            val gcArr = Array.tabulate( rasterDims._1, rasterDims._2 )((x, y) =>
             {
-                val diameter = 2*radius + 1
-                val invrsq = 1.0F/(radius*radius)
+                val res = gridCoverage.evaluate( new GridCoordinates2D( x, y ), Array[Float](0.0f) )
+                res(0)
+            } )//gridCoverage.getBackingArray
 
-                val gaussianData = new Array[Float](diameter)
-
-                var sum = 0.0F
-                for ( i <- 0 until diameter )
-                {
-                    val d = i - radius;
-                    val v = scala.math.exp(-d*d*invrsq).toFloat
-                    gaussianData(i) = v
-                    sum += v
-                }
-
-                // Normalize
-                val invsum = 1.0F/sum;
-                for ( i <- 0 until diameter )
-                {
-                    gaussianData(i) *= invsum;
-                }
-
-                new KernelJAI(diameter, diameter, radius, radius, gaussianData, gaussianData)
-            }
+            val gmk = new GaussianMaxKernel( current.radius,
+            {
+                (x, y) => if ( x >=0 && y >= 0 && x < rasterDims._1 && y < rasterDims._2 ) Some(gcArr(y)(x)) else None
+            } )
             
+            for ( x <- 0 until rasterDims._1; y <- 0 until rasterDims._2 )
+            {
+                cellWeights(x)(y) += gmk(x, y)
+            }
+        }
+        
+        def writeTiff( fileName : String, coverage : GridCoverage2D )
+        {
             import org.geotools.gce.geotiff.GeoTiffFormat
             
-            val envelope = featureCollection.getBounds()
-                
-            
-            import org.geotools.filter.{ConstantExpression, AttributeExpressionImpl}
-            import org.geotools.process.raster.VectorToRasterProcess
-
-            val gridCoverage = VectorToRasterProcess.process( featureCollection, new AttributeExpressionImpl("weight"), new java.awt.Dimension( 1000, 1000 ), envelope, "agrid", null )
-            
-
-            val df = new org.geotools.coverage.processing.CoverageProcessor()
-            val convolver = new org.geotools.coverage.processing.operation.Convolve()
-            
-            val cparams = df.getOperation("Convolve").getParameters()
-            cparams.parameter("Source").setValue(gridCoverage)
-            cparams.parameter("kernel").setValue( makeGaussianKernel(20) )
-            
-            val convolved = convolver.doOperation(cparams, null).asInstanceOf[GridCoverage2D]
-            
-            def writeTiff( fileName : String, coverage : GridCoverage2D )
+            val outputFile = new java.io.File( fileName )
+            val format = new GeoTiffFormat()
+            val writer = format.getWriter(outputFile)
+            writer.write( coverage, null )
+        }
+        
+        val gcf = new GridCoverageFactory()
+        val heatMapCoverage = gcf.create("agrid", cellWeights, envelope)
+        writeTiff("test.tiff", heatMapCoverage)
+        
+        {
+            val gridGeom = heatMapCoverage.getGridGeometry()
+            def worldToGrid( dp : DirectPosition2D) =
             {
-                val outputFile = new java.io.File( fileName )
-                val format = new GeoTiffFormat()
-                val writer = format.getWriter(outputFile)
-                writer.write( coverage, null )
+                val res = gridGeom.worldToGrid(dp)
+                (dp.x.toInt, dp.y.toInt)
             }
-            
-            writeTiff( "test.tiff", convolved )
             
             // Now step along each way, one by one sampling equally spaced points
             // using LengthIndexedLine (for both weight and SRTM rasters)
-            val resultArray = Array.tabulate( 1000, 1000 )( (x, y) => 0.0f )
+            val resultArray = Array.tabulate( rasterDims._1, rasterDims._2 )( (x, y) => 0.0f )
             for ( w <- f.ways if w.entityType == EntityType.footpath || w.entityType == EntityType.cycleway || w.entityType == EntityType.road )
             {
-                weightWay( w, convolved, resultArray )
+                weightWay( envelope, w, worldToGrid, cellWeights, resultArray )
             }
             
-            val gcf = new GridCoverageFactory()
-            val resultGrid = gcf.create( "agrid2", resultArray, convolved.getEnvelope2D() )
+            
+            val resultGrid = gcf.create( "agrid2", resultArray, envelope )
             writeTiff( "test2.tiff", resultGrid )
         }
         

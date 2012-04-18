@@ -9,10 +9,26 @@ import scala.io.Source
 import scala.xml.pull.{XMLEventReader, EvElemStart, EvElemEnd, EvText}
 
 import org.geotools.referencing.CRS
-import org.geotools.geometry.{DirectPosition2D}
+import org.geotools.geometry.{DirectPosition2D, Envelope2D}
+
+class Bounds
+{
+    private var minX, minY = Double.MaxValue
+    private var maxX, maxY = Double.MinValue
+    
+    def update( dp : DirectPosition2D )
+    {
+        minX = minX min dp.x
+        minY = minY min dp.y
+        maxX = maxX max dp.x
+        maxY = maxY max dp.y
+    }
+    
+    def envelope = new Envelope2D( CRS.decode("EPSG:3857", false), minX, minY, (maxX-minX), (maxY-minY) )
+}
 
 // Longitude W-E
-class OSMReader( val fileName : String, bounds : Bounds )
+class OSMReader( val fileName : String )
 {           
     var nodes = mutable.HashMap[Long, Node]()
     val ways = mutable.ArrayBuffer[Way]()
@@ -24,8 +40,8 @@ class OSMReader( val fileName : String, bounds : Bounds )
     val lenient = true
     val transform = CRS.findMathTransform(lonLatCRS, ourCRS, lenient)
     
-    //Geometry targetGeometry = JTS.transform( sourceGeometry, transform)
-
+    val bounds = new Bounds()
+    
     {
         val fin = new FileInputStream( fileName )
         val in = new BufferedInputStream(fin)
@@ -33,8 +49,6 @@ class OSMReader( val fileName : String, bounds : Bounds )
         
         val source = Source.fromInputStream( decompressor )
         val parser = new XMLEventReader(source)
-        
-        val (meanlon, meanlat) = ((bounds.lon1 + bounds.lon2)/2.0, (bounds.lat1 + bounds.lat2)/2.0)
         
         var currTaggable : Option[Taggable] = None
         var currWay = new Way()
@@ -48,14 +62,14 @@ class OSMReader( val fileName : String, bounds : Bounds )
                     val lat = attrs("lat").text.toDouble
                     val lon = attrs("lon").text.toDouble
                     
-                    //if ( bounds.within( lat, lon ) )
-                    {
-                        val pos = new DirectPosition2D( lat, lon )
-                        transform.transform( pos, pos )
-                        val nn = new Node( pos )
-                        nodes += id -> nn
-                        currTaggable = Some(nn)
-                    }
+                    val pos = new DirectPosition2D( lat, lon )
+                    transform.transform( pos, pos )
+                    
+                    bounds.update( pos )
+                    
+                    val nn = new Node( pos )
+                    nodes += id -> nn
+                    currTaggable = Some(nn)
                 }
                 
                 case EvElemStart(_, "way", attrs, _) =>
