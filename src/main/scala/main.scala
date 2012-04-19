@@ -3,7 +3,9 @@ package org.seacourt.osm
 import scala.util.Random.{nextInt, nextFloat}
 import scala.collection.{mutable, immutable}
 
-
+import org.opengis.geometry.{Envelope}
+import org.opengis.coverage.grid.{GridEnvelope}
+import org.geotools.coverage.grid.{GridGeometry2D, GridEnvelope2D}
 import org.geotools.coverage.grid.{GridCoverageFactory, GridCoverage2D, GridCoordinates2D}
 import org.opengis.referencing.crs._
 import org.geotools.referencing.crs._
@@ -162,7 +164,7 @@ object TestRunner extends App
     // building=cathedral/chapel/church, craft=?, geological=?, mountain_pass=yes,
     // man_made=adit/lighthouse/pier/watermill/water_well/windmill
     // natural=?, railway=abandoned/disused/funicular
-    // route=?, tourism=?, waterway=?(not ditch/drain)        
+    // route=?, tourism=?, waterway=?(not ditch/drain)
     override def main( args : Array[String] ) =
     {
         // Oxford
@@ -185,65 +187,103 @@ object TestRunner extends App
         def rasterDims = (1000, 1000)
         val envelope = f.bounds.envelope
         
-        val cellWeights = Array.tabulate( rasterDims._1, rasterDims._2 )( (x, y) => 0.0f )
-        for ( current <- ofInterest )
-        {
-            println( "Generating raster for %s".format(current.et) )
-            val featureCollection = FeatureCollections.newCollection("lines")
+        val gridGeoms = new GridGeometry2D(
+            new GridEnvelope2D( 0, 0, rasterDims._1, rasterDims._2 ).asInstanceOf[GridEnvelope],
+            envelope.asInstanceOf[Envelope] )
         
-            import org.geotools.geometry.jts.{JTSFactoryFinder}
-            import com.vividsolutions.jts.geom.{GeometryFactory, LinearRing, Coordinate}
-            import org.geotools.feature.simple.{SimpleFeatureBuilder}
-            import org.geotools.gml.producer.{FeatureTransformer}
-               
-            // Build all the features for this entity type into the feature list
-            val geometryFactory = JTSFactoryFinder.getGeometryFactory( null )
-            for ( w <- f.ways if w.entityType == current.et )
-            {
-                val coords = w.nodes.view.map( n => new Coordinate( n.pos.x, n.pos.y ) ).toList
-                
-                if ( w.entityType.closed && w.entityType != EntityType.waterway && coords.length > 3 )
-                {
-                    val ring = geometryFactory.createLinearRing( (coords ++ List( coords.head )).toArray )
-                    val holes : Array[LinearRing] = null
-                    val polygon = geometryFactory.createPolygon( ring, holes )
-                    val feature = SimpleFeatureBuilder.build(GISTypes.shape, Array[java.lang.Object](polygon), null)
-                    featureCollection.add( feature )
-                }
-                else if ( coords.length > 1 )
-                {   
-                    val line = geometryFactory.createLineString( coords.toArray )
-                    val feature = SimpleFeatureBuilder.build(GISTypes.line, Array[java.lang.Object](line), null)
-                    featureCollection.add( feature )
-                }
-            }
-       
-            
-            // Render the features directly onto a grid
-            val gridCoverage = VectorToRasterProcess.process( featureCollection, ConstantExpression.constant(scala.math.abs(current.weight)), new java.awt.Dimension( rasterDims._1, rasterDims._2 ), envelope, "agrid", null )
-            
-            // Buffer the features out using max kernel and an appropriate radius into cellWeights
-            val gcArr = Array.tabulate( rasterDims._1, rasterDims._2 )((x, y) =>
-            {
-                val res = gridCoverage.evaluate( new GridCoordinates2D( x, y ), Array[Float](0.0f) )
-                res(0)
-            } )//gridCoverage.getBackingArray
-
-            val gmk = new GaussianMaxKernel( current.radius,
-            {
-                (x, y) => if ( x >=0 && y >= 0 && x < rasterDims._1 && y < rasterDims._2 ) Some(gcArr(y)(x)) else None
-            } )
+        val cellWeights = Array.tabulate( rasterDims._1, rasterDims._2 )( (x, y) => 0.0f )
+        
+        def smooth( weight : Double, radius : Int, into : Array[Array[Float]], fromFn : (Int, Int) => Option[Double] )
+        {
+            val gmk = new GaussianMaxKernel( radius, fromFn )
             
             for ( x <- 0 until rasterDims._1; y <- 0 until rasterDims._2 )
             {
-                if ( current.weight >= 0.0 )
+                if ( weight >= 0.0 )
                 {
-                    cellWeights(x)(y) += gmk(x, y)
+                    into(x)(y) += gmk(x, y)
                 }
                 else
                 {
-                    cellWeights(x)(y) -= gmk(x, y)
+                    into(x)(y) -= gmk(x, y)
                 }
+            }
+        }
+        
+        // Write out all the single node points of interest and smooth
+        {
+            val weight = 1000.0f
+            
+            val nodePointWeights = Array.tabulate( rasterDims._1, rasterDims._2 )( (x, y) => 0.0f )
+            for ( (i, n) <- f.nodes if !n.inWay )
+            {
+                val goodNode =
+                    n.has("historic") || n.has("building", "cathedral") || n.has("building", "chapel") || n.has("building", "church") ||
+                    n.has("geological") || n.has("man_made", "adit") || n.has("man_made", "lighthouse") || n.has("man_made", "pier") ||
+                    n.has("man_made", "watermill") || n.has("man_made", "water_well") || n.has("man_made", "windmill") ||
+                    n.has("tourism") || n.has("craft") || n.has("archaeological") || n.has("barrier", "stile") || n.has("barrier", "gate") ||
+                    n.has("barrier", "cattle_grid")
+
+                if ( goodNode )
+                {
+                    val grid = gridGeoms.worldToGrid( n.pos )
+                    nodePointWeights(grid.x)(grid.y) = weight
+                }
+            }
+            smooth( weight, 10, cellWeights,
+                (x, y) => if ( x >=0 && y >= 0 && x < rasterDims._1 && y < rasterDims._2 ) Some(nodePointWeights(y)(x)) else None
+            )
+        }
+        
+        // Write out all the vectors to raster
+        if ( true )
+        {
+            for ( current <- ofInterest )
+            {
+                println( "Generating raster for %s".format(current.et) )
+                val featureCollection = FeatureCollections.newCollection("lines")
+            
+                import org.geotools.geometry.jts.{JTSFactoryFinder}
+                import com.vividsolutions.jts.geom.{GeometryFactory, LinearRing, Coordinate}
+                import org.geotools.feature.simple.{SimpleFeatureBuilder}
+                import org.geotools.gml.producer.{FeatureTransformer}
+                   
+                // Build all the features for this entity type into the feature list
+                val geometryFactory = JTSFactoryFinder.getGeometryFactory( null )
+                for ( w <- f.ways if w.entityType == current.et )
+                {
+                    val coords = w.nodes.view.map( n => new Coordinate( n.pos.x, n.pos.y ) ).toList
+                    
+                    if ( w.entityType.closed && w.entityType != EntityType.waterway && coords.length > 3 )
+                    {
+                        val ring = geometryFactory.createLinearRing( (coords ++ List( coords.head )).toArray )
+                        val holes : Array[LinearRing] = null
+                        val polygon = geometryFactory.createPolygon( ring, holes )
+                        val feature = SimpleFeatureBuilder.build(GISTypes.shape, Array[java.lang.Object](polygon), null)
+                        featureCollection.add( feature )
+                    }
+                    else if ( coords.length > 1 )
+                    {   
+                        val line = geometryFactory.createLineString( coords.toArray )
+                        val feature = SimpleFeatureBuilder.build(GISTypes.line, Array[java.lang.Object](line), null)
+                        featureCollection.add( feature )
+                    }
+                }
+           
+                
+                // Render the features directly onto a grid
+                val gridCoverage = VectorToRasterProcess.process( featureCollection, ConstantExpression.constant(scala.math.abs(current.weight)), new java.awt.Dimension( rasterDims._1, rasterDims._2 ), envelope, "agrid", null )
+                
+                // Buffer the features out using max kernel and an appropriate radius into cellWeights
+                val gcArr = Array.tabulate( rasterDims._1, rasterDims._2 )((x, y) =>
+                {
+                    val res = gridCoverage.evaluate( new GridCoordinates2D( x, y ), Array[Float](0.0f) )
+                    res(0)
+                } )//gridCoverage.getBackingArray
+                
+                smooth( current.weight, current.radius, cellWeights,
+                    (x, y) => if ( x >=0 && y >= 0 && x < rasterDims._1 && y < rasterDims._2 ) Some(gcArr(y)(x)) else None
+                )
             }
         }
         
