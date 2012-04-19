@@ -4,10 +4,10 @@
     <mapcanvas>
         <units>meters</units>
         <extent>
-            <xmin>-149013.143200</xmin>
-            <ymin>6756005.663893</ymin>
-            <xmax>-138367.377894</xmax>
-            <ymax>6762526.436652</ymax>
+            <xmin>-146844.382482</xmin>
+            <ymin>6753941.960069</ymin>
+            <xmax>-141521.499829</xmax>
+            <ymax>6757202.346449</ymax>
         </extent>
         <projections>1</projections>
         <destinationsrs>
@@ -39,19 +39,19 @@
                 <legendlayerfile isInOverview="0" layerid="Railway20120415233944197" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Unchecked" name="Cycleway" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Checked" name="Cycleway" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Cycleway20120415233930988" visible="0"/>
+                <legendlayerfile isInOverview="0" layerid="Cycleway20120415233930988" visible="1"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Unchecked" name="Footpath" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Checked" name="Footpath" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Footpath20120415233924313" visible="0"/>
+                <legendlayerfile isInOverview="0" layerid="Footpath20120415233924313" visible="1"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Unchecked" name="Highway" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Checked" name="Highway" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Highway20120415233917769" visible="0"/>
+                <legendlayerfile isInOverview="0" layerid="Highway20120415233917769" visible="1"/>
             </filegroup>
         </legendlayer>
         <legendlayer open="true" checked="Qt::Unchecked" name="Road" showFeatureCount="0">
@@ -59,9 +59,9 @@
                 <legendlayerfile isInOverview="0" layerid="Road20120415233909079" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Unchecked" name="Waterway" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Checked" name="Waterway" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Waterway20120415233937425" visible="0"/>
+                <legendlayerfile isInOverview="0" layerid="Waterway20120415233937425" visible="1"/>
             </filegroup>
         </legendlayer>
         <legendlayer open="true" checked="Qt::Unchecked" name="Farmland" showFeatureCount="0">
@@ -1112,7 +1112,7 @@
             <provider>gdal</provider>
             <rasterproperties>
                 <mDrawingStyle>SingleBandPseudoColor</mDrawingStyle>
-                <mColorShadingAlgorithm>FreakOutShader</mColorShadingAlgorithm>
+                <mColorShadingAlgorithm>PseudoColorShader</mColorShadingAlgorithm>
                 <mInvertColor boolean="false"/>
                 <mRedBandName>Not Set</mRedBandName>
                 <mGreenBandName>Not Set</mGreenBandName>

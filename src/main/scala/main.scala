@@ -220,7 +220,7 @@ object TestRunner extends App
        
             
             // Render the features directly onto a grid
-            val gridCoverage = VectorToRasterProcess.process( featureCollection, ConstantExpression.constant(current.weight), new java.awt.Dimension( rasterDims._1, rasterDims._2 ), envelope, "agrid", null )
+            val gridCoverage = VectorToRasterProcess.process( featureCollection, ConstantExpression.constant(scala.math.abs(current.weight)), new java.awt.Dimension( rasterDims._1, rasterDims._2 ), envelope, "agrid", null )
             
             // Buffer the features out using max kernel and an appropriate radius into cellWeights
             val gcArr = Array.tabulate( rasterDims._1, rasterDims._2 )((x, y) =>
@@ -236,7 +236,14 @@ object TestRunner extends App
             
             for ( x <- 0 until rasterDims._1; y <- 0 until rasterDims._2 )
             {
-                cellWeights(x)(y) += gmk(x, y)
+                if ( current.weight >= 0.0 )
+                {
+                    cellWeights(x)(y) += gmk(x, y)
+                }
+                else
+                {
+                    cellWeights(x)(y) -= gmk(x, y)
+                }
             }
         }
         
