@@ -120,6 +120,20 @@ object TestRunner extends App
 {
     val routeNodeMap = mutable.HashMap[DirectPosition2D, RouteNode]()
     
+    def weightToDistMultipler( weight : Double ) =
+    {
+        val maxWeight = 2.0f
+        val minWeight = -2.0f;
+        
+        val clipped = (weight min maxWeight) max minWeight
+        
+        // Max weight - 1.0, min weight - 0.0
+        val normalized = clipped / (maxWeight - minWeight)
+        
+        // Max weight, distance x 1.0; min weight, dist x 4.0
+        1.0 + 3.0*(1.0 - normalized)
+    }
+    
     def weightWay( envelope : Envelope2D, way : Way, worldToGrid : DirectPosition2D => (Int, Int), heatMap : Array[Array[Float]], resultArray : Array[Array[Float]] )
     {
         import org.geotools.geometry.{DirectPosition2D}
@@ -164,9 +178,10 @@ object TestRunner extends App
                             }
                         }
                         
-                        // Increment of 100m
-                        index += 100.0f
-                        routeLength += 100.0f
+                        // Increment of 50m
+                        val distIncrement = 50.0f
+                        index += distIncrement
+                        routeLength += weightToDistMultipler( distIncrement )
                     }
                     
                     val startNode = routeNodeMap.getOrElseUpdate( currPoints.head, new RouteNode( currPoints.head ) )
@@ -207,19 +222,6 @@ object TestRunner extends App
             new OfInterest( EntityType.waterway,    1.0f,   10 ),
             new OfInterest( EntityType.greenspace,  1.0f,   10 ),
             new OfInterest( EntityType.farmland,    1.0f,   10 ) )
-        def weightToDistMultipler( weight : Double ) =
-        {
-            val maxWeight = 2.0f
-            val minWeight = -2.0f;
-            
-            val clipped = (weight min maxWeight) max minWeight
-            
-            // Max weight - 1.0, min weight - 0.0
-            val normalized = clipped / (maxWeight - minWeight)
-            
-            // Max weight, distance x 1.0; min weight, dist x 4.0
-            1.0 + 3.0*(1.0 - normalized)
-        }
 
         def rasterDims = (1000, 1000)
         val envelope = f.bounds.envelope
