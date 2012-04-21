@@ -104,9 +104,22 @@ class GaussianMaxKernel( val radius : Int, val fn : (Int, Int) => Option[Double]
     }
 }
 
+class RouteNode( val pos : DirectPosition2D )
+{
+    val edges = mutable.ArrayBuffer[RouteEdge]()
+}
+
+class RouteEdge( val from : RouteNode, val to : RouteNode, val length : Double, val points : Array[DirectPosition2D] )
+{
+    from.edges.append(this)
+    to.edges.append(this)
+}
+
 
 object TestRunner extends App
 {
+    val routeNodeMap = mutable.HashMap[DirectPosition2D, RouteNode]()
+    
     def weightWay( envelope : Envelope2D, way : Way, worldToGrid : DirectPosition2D => (Int, Int), heatMap : Array[Array[Float]], resultArray : Array[Array[Float]] )
     {
         import org.geotools.geometry.{DirectPosition2D}
@@ -115,12 +128,12 @@ object TestRunner extends App
         import com.vividsolutions.jts.linearref.LengthIndexedLine
         
         val lastIndex = way.nodes.length-1
-        var currPoints = mutable.ArrayBuffer[Coordinate]()
+        var currPoints = mutable.ArrayBuffer[DirectPosition2D]()
         
         val geometryFactory = JTSFactoryFinder.getGeometryFactory( null )
         for ( (n, i) <- way.nodes.zipWithIndex )
         {
-            val currCoord = new Coordinate( n.pos.x, n.pos.y )
+            val currCoord = new DirectPosition2D( n.pos.x, n.pos.y )
             currPoints.append( currCoord )
             
             val isRouteNode = n.wayMembership > 1 || i==lastIndex
@@ -128,7 +141,9 @@ object TestRunner extends App
             {
                 if ( currPoints.size > 2 )
                 {
-                    val line = geometryFactory.createLineString( currPoints.toArray )
+                    val line = geometryFactory.createLineString( currPoints.toArray.map( v => new Coordinate(v.x, v.y) ) )
+                    
+                    var routeLength = 0.0
                     
                     // Step along this route sampling the heat map using LengthIndexedLine
                     val lil = new LengthIndexedLine(line)
@@ -137,17 +152,26 @@ object TestRunner extends App
                     val endIndex = lil.getEndIndex()
                     while (index < endIndex)
                     {
-                        val coords = lil.extractPoint(index)
-                        val dp = new DirectPosition2D( coords.x, coords.y )
+                        val coord = lil.extractPoint(index)
+                        val dp = new DirectPosition2D( coord.x, coord.y )
                         if ( envelope.contains(dp) )
                         {
                             val (x, y) = worldToGrid( dp )
-                            resultArray(y)(x) += heatMap(y)(x)
+                            val hm = heatMap(y)(x)
+                            if ( hm > 0.0 )
+                            {
+                                resultArray(y)(x) += hm
+                            }
                         }
                         
-                        // Increment of 50m
-                        index += 50.0f
+                        // Increment of 100m
+                        index += 100.0f
+                        routeLength += 100.0f
                     }
+                    
+                    val startNode = routeNodeMap.getOrElseUpdate( currPoints.head, new RouteNode( currPoints.head ) )
+                    val endNode = routeNodeMap.getOrElseUpdate( currPoints.last, new RouteNode( currPoints.last ) )
+                    new RouteEdge( startNode, endNode, routeLength, currPoints.drop(1).dropRight(1).toArray )
                 }
                 
                 currPoints.clear()
@@ -177,12 +201,25 @@ object TestRunner extends App
         case class OfInterest( et : EntityType.Value, weight : Double, radius : Int )
         
         val ofInterest = List(
-            new OfInterest( EntityType.highway,     -2000.0f,  10 ),
-            new OfInterest( EntityType.building,    -1000.0f,  10 ),
-            new OfInterest( EntityType.woodland,    1000.0f,   10 ),
-            new OfInterest( EntityType.waterway,    1000.0f,   10 ),
-            new OfInterest( EntityType.greenspace,  1000.0f,   10 ),
-            new OfInterest( EntityType.farmland,    500.0f,    10 ) )
+            new OfInterest( EntityType.highway,     -2.0f,  10 ),
+            new OfInterest( EntityType.building,    -1.0f,  10 ),
+            new OfInterest( EntityType.woodland,    1.0f,   10 ),
+            new OfInterest( EntityType.waterway,    1.0f,   10 ),
+            new OfInterest( EntityType.greenspace,  1.0f,   10 ),
+            new OfInterest( EntityType.farmland,    1.0f,   10 ) )
+        def weightToDistMultipler( weight : Double ) =
+        {
+            val maxWeight = 2.0f
+            val minWeight = -2.0f;
+            
+            val clipped = (weight min maxWeight) max minWeight
+            
+            // Max weight - 1.0, min weight - 0.0
+            val normalized = clipped / (maxWeight - minWeight)
+            
+            // Max weight, distance x 1.0; min weight, dist x 4.0
+            1.0 + 3.0*(1.0 - normalized)
+        }
 
         def rasterDims = (1000, 1000)
         val envelope = f.bounds.envelope
@@ -215,14 +252,15 @@ object TestRunner extends App
             val weight = 1000.0f
             
             val nodePointWeights = Array.tabulate( rasterDims._1, rasterDims._2 )( (x, y) => 0.0f )
-            for ( (i, n) <- f.nodes if !n.inWay )
+            for ( (i, n) <- f.nodes )
             {
                 val goodNode =
                     n.has("historic") || n.has("building", "cathedral") || n.has("building", "chapel") || n.has("building", "church") ||
                     n.has("geological") || n.has("man_made", "adit") || n.has("man_made", "lighthouse") || n.has("man_made", "pier") ||
                     n.has("man_made", "watermill") || n.has("man_made", "water_well") || n.has("man_made", "windmill") ||
                     n.has("tourism") || n.has("craft") || n.has("archaeological") || n.has("barrier", "stile") || n.has("barrier", "gate") ||
-                    n.has("barrier", "cattle_grid")
+                    n.has("barrier", "cattle_grid") || n.has("denomination", "anglican") | n.has("amenity", "pub") ||
+                    n.has("waterway", "weir")
 
                 if ( goodNode )
                 {
@@ -302,11 +340,10 @@ object TestRunner extends App
         writeTiff("test.tiff", heatMapCoverage)
         
         {
-            val gridGeom = heatMapCoverage.getGridGeometry()
-            def worldToGrid( dp : DirectPosition2D) =
+            def worldToGrid( dp : DirectPosition2D ) =
             {
-                val res = gridGeom.worldToGrid(dp)
-                (dp.x.toInt, dp.y.toInt)
+                val res : GridCoordinates2D = gridGeoms.worldToGrid(dp)
+                (res.getCoordinateValue(0), res.getCoordinateValue(1))
             }
             
             // Now step along each way, one by one sampling equally spaced points
