@@ -104,12 +104,19 @@ class GaussianMaxKernel( val radius : Int, val fn : (Int, Int) => Option[Double]
     }
 }
 
-class RouteNode( val pos : DirectPosition2D )
+class Pos( val x : Double, val y : Double )
+
+object Pos
+{
+    def apply( dp : DirectPosition2D ) = new Pos(dp.x, dp.y)
+}
+
+class RouteNode( val pos : Pos )
 {
     val edges = mutable.ArrayBuffer[RouteEdge]()
 }
 
-class RouteEdge( val from : RouteNode, val to : RouteNode, val length : Double, val points : Array[DirectPosition2D] )
+class RouteEdge( val from : RouteNode, val to : RouteNode, val length : Double, val points : Array[Pos] )
 {
     from.edges.append(this)
     to.edges.append(this)
@@ -184,9 +191,9 @@ object TestRunner extends App
                         routeLength += weightToDistMultipler( distIncrement )
                     }
                     
-                    val startNode = routeNodeMap.getOrElseUpdate( currPoints.head, new RouteNode( currPoints.head ) )
-                    val endNode = routeNodeMap.getOrElseUpdate( currPoints.last, new RouteNode( currPoints.last ) )
-                    new RouteEdge( startNode, endNode, routeLength, currPoints.drop(1).dropRight(1).toArray )
+                    val startNode = routeNodeMap.getOrElseUpdate( currPoints.head, new RouteNode( Pos(currPoints.head) ) )
+                    val endNode = routeNodeMap.getOrElseUpdate( currPoints.last, new RouteNode( Pos(currPoints.last) ) )
+                    new RouteEdge( startNode, endNode, routeLength, currPoints.drop(1).dropRight(1).toArray.map( Pos(_) ) )
                 }
                 
                 currPoints.clear()
