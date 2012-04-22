@@ -9,6 +9,7 @@ import edu.umd.cs.piccolo.event.{PBasicInputEventHandler, PInputEvent}
 
 import org.jgrapht.graph._
 
+/*
 class Canvas( val nodes : Iterable[Node], val ways : Iterable[Way], val routeGraph : RouteGraph ) extends JFrame
 {
     private def mouseClickHandler( fn : PInputEvent => Unit ) = new PBasicInputEventHandler()
@@ -256,3 +257,4 @@ class RouteGraph( xf : OSMReader )
     for ( w <- xf.ways if w.entityType.routeable && w.nodes.length > 1 ) processWay(w)
     println( "Num nodes: " + graph.vertexSet().size() + ", num edges: " + graph.edgeSet().size() )
 }
+*/

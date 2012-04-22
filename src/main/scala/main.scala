@@ -125,6 +125,10 @@ class RouteEdge( val from : RouteNode, val to : RouteNode, val length : Double, 
     to.edges.append(this)
 }
 
+class RouteGraph( val nodes : Array[RouteNode] )
+{
+}
+
 object SerializationProtocol extends sbinary.DefaultProtocol
 {
     implicit object PosFormat extends Format[Pos]
@@ -170,6 +174,20 @@ object SerializationProtocol extends sbinary.DefaultProtocol
             write( out, re.length )
             write( out, re.points.length )
             re.points.foreach( p => write(out, p) )
+        }
+    }
+    
+    implicit object RouteGraphFormat extends Format[RouteGraph]
+    {
+        def reads(in : Input) =
+        {
+            val numNodes = read[Int](in)
+            new RouteGraph( (0 until numNodes).map( i => read[RouteNode](in) ).toArray )
+        }
+        def writes( out : Output, g : RouteGraph )
+        {
+            write( out, g.nodes.size )
+            g.nodes.foreach( n => write( out, n ) )
         }
     }
 }
@@ -417,6 +435,12 @@ object TestRunner extends App
             
             val resultGrid = gcf.create( "agrid2", resultArray, envelope )
             writeTiff( "test2.tiff", resultGrid )
+            
+            val rg = new RouteGraph( routeNodeMap.map( _._2 ).toArray )
+            
+            import SerializationProtocol._
+            
+            toFile(rg)( new java.io.File("routeGraph.bin") )
         }
         
         // Stockholm
