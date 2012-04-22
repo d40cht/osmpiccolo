@@ -260,8 +260,12 @@ object TestRunner extends App
                         routeLength += weightToDistMultipler( distIncrement )
                     }
                     
-                    val startNode = routeNodeMap.getOrElseUpdate( currPoints.head, new RouteNode( Pos(currPoints.head) ) )
-                    val endNode = routeNodeMap.getOrElseUpdate( currPoints.last, new RouteNode( Pos(currPoints.last) ) )
+                    val first = currPoints.head
+                    val last = currPoints.last
+                    val fp = Pos(first)
+                    val lp = Pos(last)
+                    val startNode = routeNodeMap.getOrElseUpdate( first, new RouteNode( fp ) )
+                    val endNode = routeNodeMap.getOrElseUpdate( last, new RouteNode( lp ) )
                     new RouteEdge( startNode, endNode, routeLength, currPoints.drop(1).dropRight(1).toArray.map( Pos(_) ) )
                 }
                 
