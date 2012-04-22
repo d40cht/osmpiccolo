@@ -192,7 +192,7 @@ object SerializationProtocol extends sbinary.DefaultProtocol
     }
 }
 
-object TestRunner extends App
+class MapMaker
 {
     val routeNodeMap = mutable.HashMap[DirectPosition2D, RouteNode]()
     
@@ -262,13 +262,8 @@ object TestRunner extends App
                     
                     val first = currPoints.head
                     val last = currPoints.last
-                    val fp = Pos(first)
-                    val lp = Pos(last)
-                    assert( routeNodeMap != null )
-                    assert( first != null )
-                    assert( fp != null )
-                    val startNode = routeNodeMap.getOrElseUpdate( first, new RouteNode( fp ) )
-                    val endNode = routeNodeMap.getOrElseUpdate( last, new RouteNode( lp ) )
+                    val startNode = routeNodeMap.getOrElseUpdate( first, new RouteNode( Pos(first) ) )
+                    val endNode = routeNodeMap.getOrElseUpdate( last, new RouteNode( Pos(last) ) )
                     new RouteEdge( startNode, endNode, routeLength, currPoints.drop(1).dropRight(1).toArray.map( Pos(_) ) )
                 }
                 
@@ -287,10 +282,10 @@ object TestRunner extends App
     // man_made=adit/lighthouse/pier/watermill/water_well/windmill
     // natural=?, railway=abandoned/disused/funicular
     // route=?, tourism=?, waterway=?(not ditch/drain)
-    override def main( args : Array[String] ) =
+    def run( osmFile : String ) =
     {
         // Oxford
-        val f = new OSMReader( args(0) )
+        val f = new OSMReader( osmFile )
         
         XMLUtils.saveToGML( "output.gml", f )
         import org.geotools.feature.{FeatureCollections}
@@ -461,4 +456,12 @@ object TestRunner extends App
     }
 }
 
+object TestRunner extends App
+{
+    override def main( args : Array[String] ) =
+    {
+        val mm = new MapMaker()
+        mm.run(args(0))
+    }
+}
 
