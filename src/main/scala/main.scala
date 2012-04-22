@@ -142,15 +142,15 @@ object SerializationProtocol extends sbinary.DefaultProtocol
         def reads(in : Input) =
         {
             val rn = new RouteNode( read[Pos](in) )
-            val size = read[Int](in)
-            (0 until size).foreach( i => rn.edges.append( RouteEdgeFormat.reads(in) ) )
+            //val size = read[Int](in)
+            //(0 until size).foreach( i => rn.edges.append( RouteEdgeFormat.reads(in) ) )
             rn
         }
         def writes( out : Output, rn : RouteNode ) =
         {
             write(out, rn.pos)
-            write(out, rn.edges.size)
-            rn.edges.foreach( e => RouteEdgeFormat.writes(out, e) )
+            //write(out, rn.edges.size)
+            //rn.edges.foreach( e => RouteEdgeFormat.writes(out, e) )
         }
     }
     
