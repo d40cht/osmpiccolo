@@ -7,19 +7,19 @@ import sbinary._
 import sbinary.Operations._
 
 
-class Pos( val x : Double, val y : Double )
+case class Pos( val x : Double, val y : Double )
 
 object Pos
 {
     def apply( dp : DirectPosition2D ) = new Pos(dp.x, dp.y)
 }
 
-class RouteNode( val pos : Pos )
+case class RouteNode( val pos : Pos )
 {
     val edges = mutable.ArrayBuffer[RouteEdge]()
 }
 
-class RouteEdge( val from : RouteNode, val to : RouteNode, val length : Double, val points : Array[Pos] )
+case class RouteEdge( val from : RouteNode, val to : RouteNode, val length : Double, val points : Array[Pos] )
 {
     from.edges.append(this)
     to.edges.append(this)
