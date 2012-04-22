@@ -264,6 +264,9 @@ object TestRunner extends App
                     val last = currPoints.last
                     val fp = Pos(first)
                     val lp = Pos(last)
+                    assert( routeNodeMap != null )
+                    assert( first != null )
+                    assert( fp != null )
                     val startNode = routeNodeMap.getOrElseUpdate( first, new RouteNode( fp ) )
                     val endNode = routeNodeMap.getOrElseUpdate( last, new RouteNode( lp ) )
                     new RouteEdge( startNode, endNode, routeLength, currPoints.drop(1).dropRight(1).toArray.map( Pos(_) ) )
