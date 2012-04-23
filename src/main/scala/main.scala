@@ -367,18 +367,22 @@ object GeoJSON
 {
     abstract class JSONElement
     {
+        def write( op : String => Unit )
     }
     
     class JSONString( val str : String ) extends JSONElement
     {
+        def write( op : String => Unit ) = op( "\"" + str + "\"" )
     }
     
-    class JSONInt( val i : Int ) extends JSONElement
+    class JSONInt( val v : Int ) extends JSONElement
     {
+        def write( op : String => Unit ) = op( v.toString )
     }
     
-    class JSONDouble( val i : Double ) extends JSONElement
+    class JSONDouble( val v : Double ) extends JSONElement
     {
+        def write( op : String => Unit ) = op( v.toString )
     }
     
     class JSONDictKey( val key : String )
@@ -386,7 +390,7 @@ object GeoJSON
         def ->( value : JSONElement ) =
         {
             (key, value)
-        }
+        }        
     }
     
     implicit def strToKey( key : String ) = new JSONDictKey(key)
@@ -396,10 +400,28 @@ object GeoJSON
     
     class JSONDict( val args : (String, JSONElement)* ) extends JSONElement
     {
+        def write( op : String => Unit ) =
+        {
+            op( "{" )
+            for ( (k, v) <- args )
+            {
+                op( "\"" + k + "\"" )
+                op( ":" )
+                v.write(op)
+            }
+            op( "}" )
+        }
+
     }
     
     class JSONList( val els : JSONElement* ) extends JSONElement
     {
+        def write( op : String => Unit ) =
+        {
+            op("[")
+            els.foreach( e => e.write(op) )
+            op("]")
+        }
     }
     
     abstract class Geometry
