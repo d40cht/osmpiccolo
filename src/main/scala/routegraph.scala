@@ -7,26 +7,105 @@ import sbinary._
 import sbinary.Operations._
 
 
-case class Pos( val x : Double, val y : Double )
+final case class Pos( val x : Double, val y : Double )
 
 object Pos
 {
     def apply( dp : DirectPosition2D ) = new Pos(dp.x, dp.y)
 }
 
-case class RouteNode( val pos : Pos )
+final case class RouteNode( val pos : Pos )
 {
     val edges = mutable.ArrayBuffer[RouteEdge]()
 }
 
-case class RouteEdge( val from : RouteNode, val to : RouteNode, val length : Double, val points : Array[Pos] )
+final case class RouteEdge( val from : RouteNode, val to : RouteNode, val length : Double, val points : Array[Pos] )
 {
     from.edges.append(this)
     to.edges.append(this)
+    
+    def other( node : RouteNode ) =
+    {
+        if ( node == from ) to
+        else
+        {
+            assert( node == to )
+            from
+        }
+    }
+}
+
+final case class LabelledNode( val node : RouteNode, val dist : Double = scala.Double.MaxValue )
+{
 }
 
 class RouteGraph( val nodes : Array[RouteNode] )
 {
+    def shortestPath( from : RouteNode, to : RouteNode ) : List[(RouteNode, Double)] =
+    {
+        // Currently Dijkstra: improve to A*
+        type FHNode = org.jgrapht.util.FibonacciHeapNode[RouteNode]
+        class NodeInfo( var parent : Option[NodeInfo], val fhn : FHNode )
+        
+        val nodeMap = new java.util.HashMap[RouteNode, NodeInfo]()
+        val heap = new org.jgrapht.util.FibonacciHeap[RouteNode]
+        
+        def newNode( n : RouteNode, dist : Double, parent : Option[NodeInfo] )
+        {
+            val fhn = new FHNode(n)
+            heap.insert( fhn, dist )
+            nodeMap.put( n, new NodeInfo( parent, fhn ) )
+        }
+        
+        newNode( from, 0.0, None )
+        
+        while (!heap.isEmpty)
+        {
+            val top = heap.min
+            heap.removeMin
+            
+            for ( e <- top.getData.edges )
+            {
+                val topDist = top.getKey
+                val topN = top.getData
+                val ndist = topDist + e.length
+                val destN = e.other(topN)
+                val topNI = nodeMap.get( topN )
+                
+                if ( !nodeMap.containsKey(destN) )
+                {
+                    newNode( destN, ndist, Some(topNI) )
+                }
+                else
+                {
+                    val ni = nodeMap.get( destN )
+                    if ( ndist < ni.fhn.getKey )
+                    {
+                        heap.decreaseKey( ni.fhn, ndist )
+                        ni.parent = Some(topNI)
+                    }
+                }
+                
+                if ( destN == to )
+                {
+                    type Path = List[(RouteNode, Double)]
+                    def routePath( nio : Option[NodeInfo], path : Path ) : Path =
+                    {
+                        nio match
+                        {
+                            case Some(ni)   => routePath( ni.parent, (ni.fhn.getData, ni.fhn.getKey)::path)
+                            case None       => path
+                        }
+                    }
+                    val ni = Some(nodeMap.get(destN))
+                    
+                    return routePath( ni, Nil )
+                }
+            }
+        }
+        
+        List()
+    }
 }
 
 object SerializationProtocol extends sbinary.DefaultProtocol
