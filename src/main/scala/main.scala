@@ -363,6 +363,86 @@ class MapMaker
     }
 }
 
+object GeoJSON
+{
+    abstract class JSONElement
+    {
+    }
+    
+    class JSONString( val str : String ) extends JSONElement
+    {
+    }
+    
+    class JSONInt( val i : Int ) extends JSONElement
+    {
+    }
+    
+    class JSONDouble( val i : Double ) extends JSONElement
+    {
+    }
+    
+    class JSONDictKey( val key : String )
+    {   
+        def ->( value : JSONElement ) =
+        {
+            (key, value)
+        }
+    }
+    
+    implicit def strToKey( key : String ) = new JSONDictKey(key)
+    implicit def strToJSON( v : String ) = new JSONString(v)
+    implicit def intToJSON( v : Int ) = new JSONInt(v)
+    implicit def doubleToJSON( v : Double ) = new JSONDouble(v)
+    
+    class JSONDict( val args : (String, JSONElement)* ) extends JSONElement
+    {
+    }
+    
+    class JSONList( val els : JSONElement* ) extends JSONElement
+    {
+    }
+    
+    abstract class Geometry
+    {
+        def toJSON : JSONElement
+    }
+    
+    class Polygon( val points : Seq[(Double, Double)], val closed : Boolean ) extends Geometry
+    {
+        def toJSON = new JSONDict(
+            "type"          -> "LineString",
+            "coordinates"   -> new JSONList( points.map( p => new JSONList( p._1, p._2 ) ) : _* )
+        )
+    }
+    
+    class Feature( val id : String, val properties : List[(String, String)], val geometry : Geometry )
+    {
+        def toJSON = new JSONDict(
+            "type"          -> "Feature",
+            "id"            -> id,
+            "geometry"      -> geometry.toJSON/*,
+            "properties"    -> new JSONDict( )*/
+        )
+    }
+    
+    class FeatureCollection( val crs : String )
+    {
+        val features = mutable.ArrayBuffer[Feature]()
+        
+        def toJSON = new JSONDict(
+            "type"  -> "FeatureCollection",
+            "crs"   ->  new JSONDict(
+                "type"          -> "EPSG",
+                "properties"    -> new JSONDict(
+                    "code"              -> 4326,
+                    "coordinate_order"  -> new JSONList(1, 0)
+                )
+            ),
+            "features"  -> new JSONList( features.map( _.toJSON ) : _* )
+        )
+    }
+}
+
 class MapReader( graphFile : String )
 {
     import SerializationProtocol._
@@ -387,8 +467,16 @@ object TestRunner extends App
 {
     override def main( args : Array[String] ) =
     {
-        val mm = new MapMaker()
-        mm.run(args(0))
+        if ( true )
+        {
+            val mm = new MapMaker()
+            mm.run(args(0))
+        }
+        else
+        {
+            val rg = new MapReader( args(0) )
+            rg.run()
+        }
     }
 }
 
