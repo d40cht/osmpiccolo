@@ -471,16 +471,28 @@ class MapReader( graphFile : String )
     
     val graph = fromFile[RouteGraph]( new java.io.File(graphFile) )
     
-    def run()
+    def run( outFile : String )
     {
+        import GeoJSON._
+        
         val uniqueEdges = (for ( n <- graph.nodes; e <- n.edges ) yield e).toSet
      
-        for ( e <- uniqueEdges )
+        val fc = new FeatureCollection( "3857" )
+        for ( (e, i) <- uniqueEdges.zipWithIndex )
         {
-            for ( Pos( x, y ) <- e.points )
-            {
-                // Dump to GeoJSON? http://wiki.geojson.org/GeoJSON_draft_version_5#Examples
-            }
+            fc.features.append( new Feature( "id_%d".format(i), List(), new Polygon( e.points.map( v => (v.x, v.y) ), false ) ) )
+        }
+        
+        // Dump fc out to disk @outFile
+        val p = new java.io.PrintWriter( new java.io.File( outFile ) )
+        try
+        {
+            val json = fc.toJSON
+            json.write( s => p.write(s) )
+        }
+        finally
+        {
+            p.close()
         }
     }  
 }
@@ -497,7 +509,7 @@ object TestRunner extends App
         else
         {
             val rg = new MapReader( args(0) )
-            rg.run()
+            rg.run( args(1) )
         }
     }
 }
