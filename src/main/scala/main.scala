@@ -113,6 +113,7 @@ class GaussianMaxKernel( val radius : Int, val fn : (Int, Int) => Option[Double]
 class MapMaker
 {
     val routeNodeMap = mutable.HashMap[DirectPosition2D, RouteNode]()
+    val routeEdges = mutable.ArrayBuffer[RouteEdge]()
     
     def weightToDistMultipler( weight : Double ) =
     {
@@ -147,10 +148,11 @@ class MapMaker
             val isRouteNode = n.wayMembership > 1 || i==lastIndex
             if ( isRouteNode )
             {
-                if ( currPoints.size > 2 )
+                if ( currPoints.size >= 2 )
                 {
                     val line = geometryFactory.createLineString( currPoints.toArray.map( v => new Coordinate(v.x, v.y) ) )
                     
+                    var rawLength = 0.0
                     var routeLength = 0.0
                     
                     // Step along this route sampling the heat map using LengthIndexedLine
@@ -162,7 +164,7 @@ class MapMaker
                     {
                         val coord = lil.extractPoint(index)
                         val dp = new DirectPosition2D( coord.x, coord.y )
-                        if ( envelope.contains(dp) )
+                        val weightMult = if ( envelope.contains(dp) )
                         {
                             val (x, y) = worldToGrid( dp )
                             val hm = heatMap(y)(x)
@@ -170,19 +172,22 @@ class MapMaker
                             {
                                 resultArray(y)(x) += hm
                             }
+                            hm
                         }
+                        else 0.0
                         
                         // Increment of 50m
                         val distIncrement = 50.0f
                         index += distIncrement
-                        routeLength += weightToDistMultipler( distIncrement )
+                        rawLength += distIncrement
+                        routeLength += distIncrement * weightToDistMultipler( weightMult )
                     }
                     
                     val first = currPoints.head
                     val last = currPoints.last
                     val startNode = routeNodeMap.getOrElseUpdate( first, new RouteNode( Pos(first) ) )
                     val endNode = routeNodeMap.getOrElseUpdate( last, new RouteNode( Pos(last) ) )
-                    new RouteEdge( startNode, endNode, routeLength, currPoints.drop(1).dropRight(1).toArray.map( Pos(_) ) )
+                    routeEdges.append( new RouteEdge( startNode, endNode, routeLength, rawLength, currPoints.toArray.map( Pos(_) ) ) )
                 }
                 
                 currPoints.clear()
@@ -354,7 +359,7 @@ class MapMaker
             val resultGrid = gcf.create( "agrid2", resultArray, envelope )
             writeTiff( "test2.tiff", resultGrid )
             
-            val rg = new RouteGraph( routeNodeMap.map( _._2 ).toArray )
+            val rg = new RouteGraph( routeNodeMap.map( _._2 ).toArray, routeEdges.toArray )
             
             import SerializationProtocol._
             
@@ -403,11 +408,15 @@ object GeoJSON
         def write( op : String => Unit ) =
         {
             op( "{" )
+            var init = true
             for ( (k, v) <- args )
             {
+                if ( init ) init = false
+                else op( "," )
                 op( "\"" + k + "\"" )
                 op( ":" )
                 v.write(op)
+                
             }
             op( "}" )
         }
@@ -419,7 +428,13 @@ object GeoJSON
         def write( op : String => Unit ) =
         {
             op("[")
-            els.foreach( e => e.write(op) )
+            var init = true
+            els.foreach( e =>
+            {
+                if ( init ) init = false
+                else op( "," )
+                e.write(op)
+            } )
             op("]")
         }
     }
@@ -437,13 +452,14 @@ object GeoJSON
         )
     }
     
-    class Feature( val id : String, val properties : List[(String, String)], val geometry : Geometry )
+    class Feature( val id : String, val properties : JSONDict, val style : JSONDict, val geometry : Geometry )
     {
         def toJSON = new JSONDict(
             "type"          -> "Feature",
             "id"            -> id,
-            "geometry"      -> geometry.toJSON/*,
-            "properties"    -> new JSONDict( )*/
+            "geometry"      -> geometry.toJSON,
+            "properties"    -> properties,
+            "style"         -> style
         )
     }
     
@@ -456,7 +472,7 @@ object GeoJSON
             "crs"   ->  new JSONDict(
                 "type"          -> "EPSG",
                 "properties"    -> new JSONDict(
-                    "code"              -> 4326,
+                    "code"              -> 3857,
                     "coordinate_order"  -> new JSONList(1, 0)
                 )
             ),
@@ -474,13 +490,15 @@ class MapReader( graphFile : String )
     def run( outFile : String )
     {
         import GeoJSON._
-        
-        val uniqueEdges = (for ( n <- graph.nodes; e <- n.edges ) yield e).toSet
+
+        println( "Nodes: %d, edges:%d".format(graph.nodes.size, graph.edges.size) )
      
         val fc = new FeatureCollection( "3857" )
-        for ( (e, i) <- uniqueEdges.zipWithIndex )
+        for ( (e, i) <- graph.edges.zipWithIndex )
         {
-            fc.features.append( new Feature( "id_%d".format(i), List(), new Polygon( e.points.map( v => (v.x, v.y) ), false ) ) )
+            val style = new JSONDict( "color" -> "#50FF50" )
+
+            fc.features.append( new Feature( "id_%d".format(i), new JSONDict(), style, new Polygon( e.points.map( v => (v.x, v.y) ), false ) ) )
         }
         
         // Dump fc out to disk @outFile

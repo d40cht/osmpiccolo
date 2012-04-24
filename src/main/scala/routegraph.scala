@@ -19,7 +19,7 @@ final case class RouteNode( val pos : Pos )
     val edges = mutable.ArrayBuffer[RouteEdge]()
 }
 
-final case class RouteEdge( val from : RouteNode, val to : RouteNode, val length : Double, val points : Array[Pos] )
+final case class RouteEdge( val from : RouteNode, val to : RouteNode, val length : Double, val rawLength : Double, val points : Array[Pos] )
 {
     from.edges.append(this)
     to.edges.append(this)
@@ -39,7 +39,7 @@ final case class LabelledNode( val node : RouteNode, val dist : Double = scala.D
 {
 }
 
-class RouteGraph( val nodes : Array[RouteNode] )
+class RouteGraph( val nodes : Array[RouteNode], val edges : Array[RouteEdge] )
 {
     def shortestPath( from : RouteNode, to : RouteNode ) : List[(RouteNode, Double)] =
     {
@@ -141,9 +141,10 @@ object SerializationProtocol extends sbinary.DefaultProtocol
             val from = read[RouteNode](in)
             val to = read[RouteNode](in)
             val length = read[Double](in)
+            val rawLength = read[Double](in)
             val plen = read[Int](in)
             val points = (0 until plen).map( i => read[Pos](in) ).toArray
-            new RouteEdge( from, to, length, points )
+            new RouteEdge( from, to, length, rawLength, points )
         }
         
         def writes( out : Output, re : RouteEdge )
@@ -151,6 +152,7 @@ object SerializationProtocol extends sbinary.DefaultProtocol
             write( out, re.from )
             write( out, re.to )
             write( out, re.length )
+            write( out, re.rawLength )
             write( out, re.points.length )
             re.points.foreach( p => write(out, p) )
         }
@@ -161,12 +163,18 @@ object SerializationProtocol extends sbinary.DefaultProtocol
         def reads(in : Input) =
         {
             val numNodes = read[Int](in)
-            new RouteGraph( (0 until numNodes).map( i => read[RouteNode](in) ).toArray )
+            val nodes = (0 until numNodes).map( i => read[RouteNode](in) ).toArray
+            val numEdges = read[Int](in)
+            val edges = (0 until numEdges).map( i => read[RouteEdge](in) ).toArray
+            
+            new RouteGraph( nodes, edges )
         }
         def writes( out : Output, g : RouteGraph )
         {
             write( out, g.nodes.size )
             g.nodes.foreach( n => write( out, n ) )
+            write( out, g.edges.size )
+            g.edges.foreach( e => write( out, e ) )
         }
     }
 }
