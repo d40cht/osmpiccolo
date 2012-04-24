@@ -4,10 +4,10 @@
     <mapcanvas>
         <units>meters</units>
         <extent>
-            <xmin>-181706.365738</xmin>
-            <ymin>6763441.759940</ymin>
-            <xmax>-160414.835126</xmax>
-            <ymax>6776483.305460</ymax>
+            <xmin>-168447.461126</xmin>
+            <ymin>6749888.213003</ymin>
+            <xmax>-125864.399902</xmax>
+            <ymax>6775971.304043</ymax>
         </extent>
         <projections>1</projections>
         <destinationsrs>
@@ -24,9 +24,14 @@
         </destinationsrs>
     </mapcanvas>
     <legend>
-        <legendlayer open="true" checked="Qt::Checked" name="Kirche/Friedhof/Kirchengelaende/Airport/Bahn/Bahnhof/Grossstadt/Stadt/Dorf/Weiler/Stadtteil/Ortschaft/Autobahn/Kraftfahrstrasse/Bundesstrasse/Landstrasse/einfache_Strasse/Zufahrtswege/Wohnstrasse/Wege/Radweg/Fussgaengerweg/Strand/Kueste/Inselpunkte/Insel/Wasserbecken/Kanal/Baeche/Fluesse/Wasser/Gebaeude/Wiese/Wald/Naherholungsgebiet/Park/Fussgaengerzone/unkultiviertes_Land/Gruenflaeche/Bauland/Industriegebiet/Landwirtschaft" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Checked" name="OGRGeoJSON" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="Kirche_Friedhof_Kirchengelaende_Airport_Bahn_Bahnhof_Grossstadt_Stadt_Dorf_Weiler_Stadtteil_Ortschaft_Autobahn_Kraftfahrstrasse_Bundesstrasse_Landstrasse_einfache_Strasse_Zufahrtswege_Wohnstrasse_Wege_Radweg_Fussgaengerweg_Strand_Kueste_Inselpunkte_Insel_Wasserbecken_Kanal_Baeche_Fluesse_Wasser_Gebaeude_Wiese_Wald_Naherholungsgebiet_Park_Fussgaengerzone_unkultiviertes_Land_Gruenflaeche_Bauland_Industriegebiet_Landwirtschaft20120415234428018" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="routeOverlay20120424215815222" visible="1"/>
+            </filegroup>
+        </legendlayer>
+        <legendlayer open="true" checked="Qt::Unchecked" name="Kirche/Friedhof/Kirchengelaende/Airport/Bahn/Bahnhof/Grossstadt/Stadt/Dorf/Weiler/Stadtteil/Ortschaft/Autobahn/Kraftfahrstrasse/Bundesstrasse/Landstrasse/einfache_Strasse/Zufahrtswege/Wohnstrasse/Wege/Radweg/Fussgaengerweg/Strand/Kueste/Inselpunkte/Insel/Wasserbecken/Kanal/Baeche/Fluesse/Wasser/Gebaeude/Wiese/Wald/Naherholungsgebiet/Park/Fussgaengerzone/unkultiviertes_Land/Gruenflaeche/Bauland/Industriegebiet/Landwirtschaft" showFeatureCount="0">
+            <filegroup open="true" hidden="false">
+                <legendlayerfile isInOverview="0" layerid="Kirche_Friedhof_Kirchengelaende_Airport_Bahn_Bahnhof_Grossstadt_Stadt_Dorf_Weiler_Stadtteil_Ortschaft_Autobahn_Kraftfahrstrasse_Bundesstrasse_Landstrasse_einfache_Strasse_Zufahrtswege_Wohnstrasse_Wege_Radweg_Fussgaengerweg_Strand_Kueste_Inselpunkte_Insel_Wasserbecken_Kanal_Baeche_Fluesse_Wasser_Gebaeude_Wiese_Wald_Naherholungsgebiet_Park_Fussgaengerzone_unkultiviertes_Land_Gruenflaeche_Bauland_Industriegebiet_Landwirtschaft20120415234428018" visible="0"/>
             </filegroup>
         </legendlayer>
         <legendlayer open="true" checked="Qt::Unchecked" name="Unknown" showFeatureCount="0">
@@ -84,23 +89,23 @@
                 <legendlayerfile isInOverview="0" layerid="Building20120415234007267" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer open="true" checked="Qt::Unchecked" name="test2" showFeatureCount="0">
+        <legendlayer open="true" checked="Qt::Checked" name="test2" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="test220120415233719373" visible="0"/>
-            </filegroup>
-        </legendlayer>
-        <legendlayer open="true" checked="Qt::Unchecked" name="N51W002" showFeatureCount="0">
-            <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="N51W00220120415233819804" visible="0"/>
+                <legendlayerfile isInOverview="0" layerid="test220120421075933073" visible="1"/>
             </filegroup>
         </legendlayer>
         <legendlayer open="true" checked="Qt::Checked" name="test" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="test20120415233702633" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="test20120420202027060" visible="1"/>
+            </filegroup>
+        </legendlayer>
+        <legendlayer open="true" checked="Qt::Checked" name="N51W002" showFeatureCount="0">
+            <filegroup open="true" hidden="false">
+                <legendlayerfile isInOverview="0" layerid="N51W00220120415233819804" visible="1"/>
             </filegroup>
         </legendlayer>
     </legend>
-    <projectlayers layercount="15">
+    <projectlayers layercount="16">
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Polygon" type="vector" hasScaleBasedVisibilityFlag="0">
             <id>Building20120415234007267</id>
             <datasource>./output.gml|layername=Building</datasource>
@@ -734,7 +739,7 @@
             <customproperties/>
             <provider>gdal</provider>
             <rasterproperties>
-                <mDrawingStyle>SingleBandPseudoColor</mDrawingStyle>
+                <mDrawingStyle>SingleBandGray</mDrawingStyle>
                 <mColorShadingAlgorithm>PseudoColorShader</mColorShadingAlgorithm>
                 <mInvertColor boolean="false"/>
                 <mRedBandName>Not Set</mRedBandName>
@@ -746,11 +751,11 @@
                 <mRGBMinimumMaximumEstimated boolean="true"/>
                 <mUserDefinedGrayMinimumMaximum boolean="false"/>
                 <mGrayMinimumMaximumEstimated boolean="true"/>
-                <mContrastEnhancementAlgorithm>NoEnhancement</mContrastEnhancementAlgorithm>
+                <mContrastEnhancementAlgorithm>StretchToMinimumMaximum</mContrastEnhancementAlgorithm>
                 <contrastEnhancementMinMaxValues>
                     <minMaxEntry>
-                        <min>-32768</min>
-                        <max>32767</max>
+                        <min>13</min>
+                        <max>321</max>
                     </minMaxEntry>
                 </contrastEnhancementMinMaxValues>
                 <mNoDataValue mValidNoDataValue="true">-32768.000000</mNoDataValue>
@@ -1091,8 +1096,73 @@
             <annotationform>.</annotationform>
             <attributeactions/>
         </maplayer>
+        <maplayer minimumScale="0" maximumScale="1e+08" geometry="Line" type="vector" hasScaleBasedVisibilityFlag="0">
+            <id>routeOverlay20120424215815222</id>
+            <datasource>./routeOverlay.geojson</datasource>
+            <layername>OGRGeoJSON</layername>
+            <srs>
+                <spatialrefsys>
+                    <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
+                    <srsid>3857</srsid>
+                    <srid>3857</srid>
+                    <authid>EPSG:3857</authid>
+                    <description>WGS 84 / Pseudo Mercator</description>
+                    <projectionacronym>merc</projectionacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
+                    <geographicflag>false</geographicflag>
+                </spatialrefsys>
+            </srs>
+            <transparencyLevelInt>255</transparencyLevelInt>
+            <provider encoding="System">ogr</provider>
+            <vectorjoins/>
+            <renderer-v2 symbollevels="0" type="singleSymbol">
+                <symbols>
+                    <symbol outputUnit="MM" alpha="1" type="line" name="0">
+                        <layer pass="0" class="SimpleLine" locked="0">
+                            <prop k="capstyle" v="square"/>
+                            <prop k="color" v="102,148,124,255"/>
+                            <prop k="customdash" v="5;2"/>
+                            <prop k="joinstyle" v="bevel"/>
+                            <prop k="offset" v="0"/>
+                            <prop k="penstyle" v="solid"/>
+                            <prop k="use_custom_dash" v="0"/>
+                            <prop k="width" v="0.26"/>
+                        </layer>
+                    </symbol>
+                </symbols>
+                <rotation field=""/>
+                <sizescale field=""/>
+            </renderer-v2>
+            <customproperties/>
+            <displayfield></displayfield>
+            <label>0</label>
+            <labelattributes>
+                <label fieldname="" text="Label"/>
+                <family fieldname="" name="Ubuntu"/>
+                <size fieldname="" units="pt" value="12"/>
+                <bold fieldname="" on="0"/>
+                <italic fieldname="" on="0"/>
+                <underline fieldname="" on="0"/>
+                <strikeout fieldname="" on="0"/>
+                <color fieldname="" red="0" blue="0" green="0"/>
+                <x fieldname=""/>
+                <y fieldname=""/>
+                <offset x="0" y="0" units="pt" yfieldname="" xfieldname=""/>
+                <angle fieldname="" value="0" auto="0"/>
+                <alignment fieldname="" value="center"/>
+                <buffercolor fieldname="" red="255" blue="255" green="255"/>
+                <buffersize fieldname="" units="pt" value="1"/>
+                <bufferenabled fieldname="" on=""/>
+                <multilineenabled fieldname="" on=""/>
+                <selectedonly on=""/>
+            </labelattributes>
+            <editform></editform>
+            <editforminit></editforminit>
+            <annotationform></annotationform>
+            <attributeactions/>
+        </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
-            <id>test20120415233702633</id>
+            <id>test20120420202027060</id>
             <datasource>./test.tiff</datasource>
             <layername>test</layername>
             <srs>
@@ -1123,14 +1193,14 @@
                 <mRGBMinimumMaximumEstimated boolean="true"/>
                 <mUserDefinedGrayMinimumMaximum boolean="false"/>
                 <mGrayMinimumMaximumEstimated boolean="true"/>
-                <mContrastEnhancementAlgorithm>NoEnhancement</mContrastEnhancementAlgorithm>
+                <mContrastEnhancementAlgorithm>StretchToMinimumMaximum</mContrastEnhancementAlgorithm>
                 <contrastEnhancementMinMaxValues>
                     <minMaxEntry>
-                        <min>-3.40282e+38</min>
-                        <max>3.40282e+38</max>
+                        <min>0</min>
+                        <max>1998</max>
                     </minMaxEntry>
                 </contrastEnhancementMinMaxValues>
-                <mNoDataValue mValidNoDataValue="true">0.000000</mNoDataValue>
+                <mNoDataValue mValidNoDataValue="true">2147480000.000000</mNoDataValue>
                 <singleValuePixelList>
                     <pixelListEntry pixelValue="2147480000.000000" percentTransparent="100"/>
                 </singleValuePixelList>
@@ -1140,7 +1210,7 @@
             </rasterproperties>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
-            <id>test220120415233719373</id>
+            <id>test220120421075933073</id>
             <datasource>./test2.tiff</datasource>
             <layername>test2</layername>
             <srs>
@@ -1160,7 +1230,7 @@
             <provider>gdal</provider>
             <rasterproperties>
                 <mDrawingStyle>SingleBandPseudoColor</mDrawingStyle>
-                <mColorShadingAlgorithm>FreakOutShader</mColorShadingAlgorithm>
+                <mColorShadingAlgorithm>PseudoColorShader</mColorShadingAlgorithm>
                 <mInvertColor boolean="false"/>
                 <mRedBandName>Not Set</mRedBandName>
                 <mGreenBandName>Not Set</mGreenBandName>
