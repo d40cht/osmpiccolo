@@ -361,7 +361,8 @@ class MapMaker
             
             val rg = new RouteGraph( routeNodeMap.map( _._2 ).toArray, routeEdges.toArray )
             
-            import SerializationProtocol._
+            val serializer = new SerializationProtocol()
+            import serializer._
             
             toFile(rg)( new java.io.File("routeGraph.bin") )
         }
@@ -483,7 +484,8 @@ object GeoJSON
 
 class MapReader( graphFile : String )
 {
-    import SerializationProtocol._
+    val serializer = new SerializationProtocol()
+    import serializer._
     
     val graph = fromFile[RouteGraph]( new java.io.File(graphFile) )
     

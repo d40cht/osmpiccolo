@@ -108,8 +108,37 @@ class RouteGraph( val nodes : Array[RouteNode], val edges : Array[RouteEdge] )
     }
 }
 
-object SerializationProtocol extends sbinary.DefaultProtocol
+class SerializationProtocol extends sbinary.DefaultProtocol
 {
+    val objToIdMap = mutable.HashMap[AnyRef, Long]()
+    val idToObjMap = mutable.HashMap[Long, AnyRef]()
+    var lastObjId = 0
+    
+    def readRef[T]( in : Input ) =
+    {
+        val id = read[Long](in)
+        idToObjMap.get(id).asInstanceOf[T]
+    }
+    
+    def writeRef[T]( out : Output, obj : T ) =
+    {
+        val id = objToIdMap.get(out)
+        write( out, id )
+    }
+    
+    def registerRead[T]( obj : T ) =
+    {
+        idToObjMap.put( lastObjId, obj.asInstanceOf[AnyRef] )
+        lastObjId += 1
+        obj
+    }
+    
+    def registerWrite[T]( obj : T )
+    {
+        objToIdMap.put( obj.asInstanceOf[AnyRef], lastObjId )
+        lastObjId += 1
+    }
+    
     implicit object PosFormat extends Format[Pos]
     {
         def reads(in : Input) = new Pos( read[Double](in), read[Double](in) )
@@ -120,11 +149,12 @@ object SerializationProtocol extends sbinary.DefaultProtocol
     {
         def reads(in : Input) =
         {
-            val rn = new RouteNode( read[Pos](in) )
+            val rn = registerRead( new RouteNode( read[Pos](in) ) )
             rn
         }
         def writes( out : Output, rn : RouteNode ) =
         {
+            registerWrite( rn )
             write(out, rn.pos)
         }
     }
@@ -134,8 +164,8 @@ object SerializationProtocol extends sbinary.DefaultProtocol
         def reads(in : Input) =
         {
             // val from : RouteNode, val to : RouteNode, val length : Double, val points : Array[Pos]
-            val from = read[RouteNode](in)
-            val to = read[RouteNode](in)
+            val from = readRef[RouteNode](in)
+            val to = readRef[RouteNode](in)
             val length = read[Double](in)
             val rawLength = read[Double](in)
             val plen = read[Int](in)
@@ -145,8 +175,8 @@ object SerializationProtocol extends sbinary.DefaultProtocol
         
         def writes( out : Output, re : RouteEdge )
         {
-            write( out, re.from )
-            write( out, re.to )
+            writeRef( out, re.from )
+            writeRef( out, re.to )
             write( out, re.length )
             write( out, re.rawLength )
             write( out, re.points.length )
