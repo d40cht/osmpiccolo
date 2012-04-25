@@ -121,15 +121,11 @@ object SerializationProtocol extends sbinary.DefaultProtocol
         def reads(in : Input) =
         {
             val rn = new RouteNode( read[Pos](in) )
-            //val size = read[Int](in)
-            //(0 until size).foreach( i => rn.edges.append( RouteEdgeFormat.reads(in) ) )
             rn
         }
         def writes( out : Output, rn : RouteNode ) =
         {
             write(out, rn.pos)
-            //write(out, rn.edges.size)
-            //rn.edges.foreach( e => RouteEdgeFormat.writes(out, e) )
         }
     }
     
@@ -169,6 +165,7 @@ object SerializationProtocol extends sbinary.DefaultProtocol
             
             new RouteGraph( nodes, edges )
         }
+        
         def writes( out : Output, g : RouteGraph )
         {
             write( out, g.nodes.size )
